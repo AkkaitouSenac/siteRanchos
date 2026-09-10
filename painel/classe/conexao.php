@@ -4,7 +4,7 @@ class Conexao {
     private $host = "localhost";
     private $usuario = "root";
     private $senha = "1234";
-    private $banco = "lolzinho";
+    private $banco = "ranchos";
     private $conn;
 
     public function __construct(){
