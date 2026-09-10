@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://cdn.jsdelivr.net; script-src 'self' https://cdn.jsdelivr.net; font-src 'self' https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self';">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anúncios - Ranchos Araçatuba & Região</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous"
+        referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <header class="bg-primary text-white py-4">
+        <div class="container">
+            <nav class="navbar navbar-expand-lg navbar-dark">
+                <div class="d-flex align-items-center w-100 flex-wrap">
+                    <div id="authArea" class="order-1 me-3"></div>
+                    <a class="navbar-brand fw-bold order-2 me-auto" href="index.html">Ranchos Araçatuba &
+                        Região</a>
+                    <button class="navbar-toggler order-3" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false"
+                        aria-label="Alternar navegação">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse order-4" id="navMenu">
+                        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                            <li class="nav-item"><a class="nav-link text-white" href="index.html">Início</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="sobre.html">Sobre</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="contato.html">Contato</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container py-5">
+        <section class="mb-4">
+            <h1>Anúncios de ranchos</h1>
+            <p>Use os filtros abaixo para encontrar ranchos por local, preço e capacidade. Para divulgar o seu
+                rancho, clique em <strong>Entrar</strong> no topo da tela.</p>
+        </section>
+
+        <ul class="nav nav-tabs mb-4" id="adTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="browse-tab" data-bs-toggle="tab" data-bs-target="#browse"
+                    type="button" role="tab" aria-controls="browse" aria-selected="true">Buscar anúncios</button>
+            </li>
+            <li class="nav-item d-none" id="painelTabItem" role="presentation">
+                <button class="nav-link" id="painel-tab" data-bs-toggle="tab" data-bs-target="#painel"
+                    type="button" role="tab" aria-controls="painel" aria-selected="false">Minha área</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="adTabsContent">
+            <div class="tab-pane fade show active" id="browse" role="tabpanel" aria-labelledby="browse-tab">
+                <section class="row g-4">
+                    <div class="col-lg-4">
+                        <div class="card shadow-sm p-3">
+                            <h2 class="h5 mb-3">Filtrar anúncios</h2>
+                            <form id="filter-form">
+                                <div class="mb-3">
+                                    <label for="searchText" class="form-label">Buscar</label>
+                                    <input type="text" id="searchText" class="form-control"
+                                        placeholder="Nome ou descrição">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="locationSelect" class="form-label">Localização</label>
+                                    <select id="locationSelect" class="form-select">
+                                        <option value="all">Todas</option>
+                                        <option value="Araçatuba">Araçatuba</option>
+                                        <option value="Bento de Abreu">Bento de Abreu</option>
+                                        <option value="Valparaíso">Valparaíso</option>
+                                        <option value="Birigui">Birigui</option>
+                                        <option value="Santo Antônio do Aracanguá">Santo Antônio do Aracanguá
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="priceRange" class="form-label">Preço máximo por diária (R$)</label>
+                                    <input type="range" id="priceRange" class="form-range" min="500" max="2000"
+                                        step="50" value="1500">
+                                    <div class="d-flex justify-content-between">
+                                        <small>R$ 500</small>
+                                        <small id="priceValue">R$ 1500</small>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="capacitySelect" class="form-label">Capacidade</label>
+                                    <select id="capacitySelect" class="form-select">
+                                        <option value="all">Qualquer</option>
+                                        <option value="4">Até 4 pessoas</option>
+                                        <option value="8">Até 8 pessoas</option>
+                                        <option value="12">Até 12 pessoas</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Aplicar filtros</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-lg-8">
+                        <div id="listings" class="row g-4"></div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="tab-pane fade" id="painel" role="tabpanel" aria-labelledby="painel-tab">
+                <div class="painel-header d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+                    <div>
+                        <h2 class="h4 mb-1">Minha área</h2>
+                        <p class="mb-0 text-muted" id="painelSubtitle">Seus anúncios de ranchos</p>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="btnNovoAnuncio" data-bs-toggle="modal"
+                        data-bs-target="#listingModal">Publicar novo anúncio</button>
+                </div>
+                <div id="meusAnuncios" class="row g-3"></div>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="authModalLabel">Área do proprietário</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small">O login é exclusivo para quem vai divulgar um rancho. Quem
+                        procura um rancho para alugar não precisa se cadastrar.</p>
+                    <ul class="nav nav-pills auth-pills mb-3" id="authPills" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="pill-entrar" data-bs-toggle="pill"
+                                data-bs-target="#pane-entrar" type="button" role="tab">Entrar</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="pill-cadastrar" data-bs-toggle="pill"
+                                data-bs-target="#pane-cadastrar" type="button" role="tab">Cadastrar</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="pane-entrar" role="tabpanel">
+                            <form id="loginForm">
+                                <div class="mb-3">
+                                    <label for="loginEmail" class="form-label">Email</label>
+                                    <input type="email" id="loginEmail" class="form-control"
+                                        placeholder="seu@email.com" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="loginSenha" class="form-label">Senha</label>
+                                    <input type="password" id="loginSenha" class="form-control" required>
+                                </div>
+                                <div id="loginFeedback" class="small text-danger mb-2"></div>
+                                <button type="submit" class="btn btn-primary w-100">Entrar</button>
+                                <p class="small text-muted mt-3 mb-0">Demonstração: carlos@exemplo.com / 1234</p>
+                            </form>
+                        </div>
+                        <div class="tab-pane fade" id="pane-cadastrar" role="tabpanel">
+                            <form id="registerForm">
+                                <div class="mb-3">
+                                    <label for="regNome" class="form-label">Nome</label>
+                                    <input type="text" id="regNome" class="form-control" placeholder="Seu nome"
+                                        required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="regEmail" class="form-label">Email</label>
+                                    <input type="email" id="regEmail" class="form-control"
+                                        placeholder="seu@email.com" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="regTelefone" class="form-label">Telefone</label>
+                                    <input type="tel" id="regTelefone" class="form-control"
+                                        placeholder="(18) 99999-9999" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="regSenha" class="form-label">Senha</label>
+                                    <input type="password" id="regSenha" class="form-control" minlength="4"
+                                        required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="regSenhaConfirma" class="form-label">Confirmar senha</label>
+                                    <input type="password" id="regSenhaConfirma" class="form-control" minlength="4"
+                                        required>
+                                </div>
+                                <div id="registerFeedback" class="small text-danger mb-2"></div>
+                                <button type="submit" class="btn btn-primary w-100">Criar conta e publicar
+                                    anúncio</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="listingModal" tabindex="-1" aria-labelledby="listingModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="listingModalLabel">Publicar novo anúncio</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="listing-form">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="listingName" class="form-label">Nome do rancho</label>
+                                <input type="text" id="listingName" class="form-control"
+                                    placeholder="Nome do anúncio" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="listingLocation" class="form-label">Localização</label>
+                                <select id="listingLocation" class="form-select" required>
+                                    <option value="Araçatuba">Araçatuba</option>
+                                    <option value="Bento de Abreu">Bento de Abreu</option>
+                                    <option value="Valparaíso">Valparaíso</option>
+                                    <option value="Birigui">Birigui</option>
+                                    <option value="Santo Antônio do Aracanguá">Santo Antônio do Aracanguá</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label for="listingDescription" class="form-label">Descrição</label>
+                                <textarea id="listingDescription" class="form-control" rows="3"
+                                    placeholder="Descrição do rancho" required></textarea>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="listingPrice" class="form-label">Preço por diária (R$)</label>
+                                <input type="number" id="listingPrice" class="form-control" min="500" step="50"
+                                    value="800" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="listingCapacity" class="form-label">Capacidade</label>
+                                <input type="number" id="listingCapacity" class="form-control" min="1" step="1"
+                                    value="6" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="listingContato" class="form-label">Contato (WhatsApp)</label>
+                                <input type="tel" id="listingContato" class="form-control"
+                                    placeholder="(18) 99999-9999" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Plano de assinatura do anúncio</label>
+                                <div id="planOptions"></div>
+                                <p class="small text-muted mt-1 mb-0">Valores de demonstração — a definir pelo
+                                    cliente.</p>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 mt-4">Publicar anúncio</button>
+                    </form>
+                    <div id="listingStatus" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-white py-4 border-top">
+        <div class="container text-center text-muted">
+            <p class="mb-0">© 2026 Ranchos Araçatuba & Região</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"
+        referrerpolicy="no-referrer"></script>
+    <script src="scripts.js"></script>
+</body>
+
+</html>
