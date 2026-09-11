@@ -5,7 +5,7 @@ if (!isset($_SESSION['admCodigo'])) {
     exit();
 } ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
@@ -22,7 +22,7 @@ if (!isset($_SESSION['admCodigo'])) {
                 <?php include 'menu.php'; ?>
             </div>
             <div class="col-10" style="text-align: center;">
-                Selecione uma opção no menu lateral para gerenciar campeões ou itens.
+                Selecione uma opção no menu lateral para gerenciar os dados do sistema.
             </div>
         </div>
     </div>
