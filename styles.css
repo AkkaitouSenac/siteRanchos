@@ -46,8 +46,8 @@ header {
 }
 
 .btn-login-top {
-    order: 3;
-    margin-left: auto;
+    order: 5;
+    margin-left: 0.75rem;
     background: rgba(255, 255, 255, 0.14);
     border: 1px solid rgba(255, 255, 255, 0.75);
     color: #fff;

@@ -18,7 +18,6 @@
         <div class="container">
             <nav class="navbar navbar-expand-lg navbar-dark">
                 <div class="d-flex align-items-center w-100 flex-wrap">
-                    <a href="anuncios.html?login=1" class="btn btn-login-top">Entrar</a>
                     <a class="navbar-brand fw-bold me-auto" href="index.php">Ranchos Araçatuba &
                         Região</a>
                     <button class="navbar-toggler order-3" type="button" data-bs-toggle="collapse"
@@ -36,6 +35,7 @@
                             </li>
                         </ul>
                     </div>
+                    <a href="anuncios.html?login=1" class="btn btn-login-top">Entrar</a>
                 </div>
             </nav>
         </div>
