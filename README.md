@@ -1,4 +1,5 @@
 LOGS
+
 Ainda não foi implementado:
 
 Persistência do frontend público no banco.
