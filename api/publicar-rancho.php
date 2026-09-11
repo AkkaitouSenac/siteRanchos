@@ -59,6 +59,18 @@ try {
         respostaPublicacao(['erro' => 'Plano de assinatura inválido.'], 422);
     }
 
+    $titulo = trim((string) ($_POST['titulo'] ?? ''));
+    $descricao = trim((string) ($_POST['descricao'] ?? ''));
+    $cidade = trim((string) ($_POST['cidade'] ?? ''));
+    $contato = trim((string) ($_POST['contato'] ?? ''));
+    $valorDiaria = (float) ($_POST['valorDiaria'] ?? 0);
+    $capacidade = (int) ($_POST['capacidade'] ?? 0);
+    if ($titulo === '' || strlen($titulo) > 100 || $descricao === '' || $cidade === ''
+        || strlen($cidade) > 45 || $contato === '' || strlen($contato) > 20
+        || $valorDiaria <= 0 || $capacidade <= 0) {
+        respostaPublicacao(['erro' => 'Preencha os dados do rancho corretamente.'], 422);
+    }
+
     $dataExpiracao = (new DateTimeImmutable('today'))
         ->modify('+' . (int) $plano['dias'] . ' days')
         ->format('Y-m-d');
@@ -74,12 +86,12 @@ try {
         'ranCodigo' => $ranCodigo,
         'proCodigo' => (int) $_SESSION['proCodigo'],
         'assCodigo' => (int) $_POST['assCodigo'],
-        'titulo' => trim((string) ($_POST['titulo'] ?? '')),
-        'descricao' => trim((string) ($_POST['descricao'] ?? '')),
-        'cidade' => trim((string) ($_POST['cidade'] ?? '')),
-        'valorDiaria' => (float) ($_POST['valorDiaria'] ?? 0),
-        'contato' => trim((string) ($_POST['contato'] ?? '')),
-        'capacidade' => (int) ($_POST['capacidade'] ?? 0),
+        'titulo' => $titulo,
+        'descricao' => $descricao,
+        'cidade' => $cidade,
+        'valorDiaria' => $valorDiaria,
+        'contato' => $contato,
+        'capacidade' => $capacidade,
         'dataExpiracao' => $dataExpiracao,
     ]);
     if (!$ok) {
