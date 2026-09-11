@@ -194,7 +194,9 @@ const updateFilters = () => {
         const matchesSearch = item.titulo.toLowerCase().includes(search) || item.descricao.toLowerCase().includes(search);
         const matchesLocation = location === 'all' || item.cidade === location;
         const matchesPrice = item.valorDiaria <= maxPrice;
-        const matchesCapacity = capacity === 'all' || item.capacidadePessoas <= Number(capacity);
+        const matchesCapacity = capacity === 'all'
+            || (capacity === '18+' && item.capacidadePessoas >= 18)
+            || (capacity !== '18+' && item.capacidadePessoas <= Number(capacity));
         return matchesSearch && matchesLocation && matchesPrice && matchesCapacity;
     });
 
