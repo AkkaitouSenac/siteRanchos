@@ -22,4 +22,5 @@ $linha = $resultado->fetch_assoc();
  $_SESSION['admCodigo'] = $linha['admCodigo'];
  $_SESSION['admNome'] = $linha['admNome'];
 header("Location: index.php");
+exit();
 }

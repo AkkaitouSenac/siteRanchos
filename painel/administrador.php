@@ -133,7 +133,7 @@ $item = $_GET['item'] ?? 'listar';
                             </div>
                             <div class="col-md-6">
                                 <label for="inputPassword4" class="form-label">Senha</label>
-                                <input value="<?php echo $admSenha; ?>" type="password" name="admSenha" class="form-control" id="inputPassword4">
+                                <input type="password" name="admSenha" class="form-control" id="inputPassword4" autocomplete="new-password">
                             </div>
                             <div class="col-12">
                                 <label for="nome" class="form-label">Nome</label>
@@ -146,30 +146,38 @@ $item = $_GET['item'] ?? 'listar';
                     </div>
                 <?php } else if ($item == 'salvar') {
                     $admEmail = $obj->escapar($_POST['admEmail'] ?? '');
-                    $admSenha = $obj->escapar($_POST['admSenha'] ?? '');
+                    $senhaRecebida = $_POST['admSenha'] ?? '';
                     $admNome = $obj->escapar($_POST['admNome'] ?? '');
-                    $campos = "admEmail, admSenha, admNome";
-                    $valores = "'$admEmail', '$admSenha', '$admNome'";
+                    $admSenha = $senhaRecebida !== '' ? $obj->escapar(password_hash($senhaRecebida, PASSWORD_DEFAULT)) : '';
                     if (isset($_POST[$chavePrimaria])) {
                         $codigo = $obj->escapar($_POST[$chavePrimaria]);
                     }
                     if (!isset($codigo)) {
+                        $campos = "admEmail, admSenha, admNome";
+                        $valores = "'$admEmail', '$admSenha', '$admNome'";
                         $resposta = $obj->salvar($table, $campos, $valores);
                         if ($resposta) {
                             header("Location: $arquivoAtual?item=listar&sucesso=1");
+                            exit();
                         } else {
                             header("Location: $arquivoAtual?item=adicionar&erro=1");
+                            exit();
                         }
                     } else {
-                        $codigo = $_POST[$chavePrimaria] ?? null;
-                        $camposValores = "admEmail = '$admEmail', admSenha = '$admSenha', admNome = '$admNome'";
+                        $codigo = $obj->escapar($_POST[$chavePrimaria] ?? '');
+                        $camposValores = "admEmail = '$admEmail', admNome = '$admNome'";
+                        if ($admSenha !== '') {
+                            $camposValores .= ", admSenha = '$admSenha'";
+                        }
                         $condicao = "$chavePrimaria = '$codigo'";
                         $resposta = $obj->atualizar($table, $camposValores, $condicao);
 
                         if ($resposta) {
                             header("Location: $arquivoAtual?item=listar&sucesso=2");
+                            exit();
                         } else {
                             header("Location: $arquivoAtual?item=adicionar&erro=1&codigo=$codigo");
+                            exit();
                         }
                     }
                 } else if ($item == 'remover') {
@@ -207,6 +215,7 @@ $item = $_GET['item'] ?? 'listar';
                     unset($_SESSION['CodigoParaRemover']);
                     if ($resposta) {
                         header("Location: $arquivoAtual?item=listar&sucesso=3");
+                        exit();
                     } else {
                         echo "Erro ao remover o administrador. Por favor, tente novamente.";
                     }

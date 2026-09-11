@@ -15,13 +15,34 @@ class Conexao {
         $this->conn->set_charset('utf8mb4');
     }
     public function login($email, $senha) {
-        $stmt = $this->conn->prepare('SELECT admCodigo, admNome FROM adm WHERE admEmail = ? AND admSenha = ?');
+        $stmt = $this->conn->prepare('SELECT admCodigo, admNome, admSenha FROM adm WHERE admEmail = ?');
         if (!$stmt) {
             return false;
         }
-        $stmt->bind_param('ss', $email, $senha);
+        $stmt->bind_param('s', $email);
         $stmt->execute();
-        return $stmt->get_result();
+        $resultado = $stmt->get_result();
+        $administrador = $resultado->fetch_assoc();
+        if (!$administrador) {
+            return false;
+        }
+
+        $senhaValida = password_verify($senha, $administrador['admSenha']);
+        if (!$senhaValida && hash_equals($administrador['admSenha'], $senha)) {
+            $novoHash = password_hash($senha, PASSWORD_DEFAULT);
+            $atualizacao = $this->conn->prepare('UPDATE adm SET admSenha = ? WHERE admCodigo = ?');
+            $atualizacao->bind_param('si', $novoHash, $administrador['admCodigo']);
+            $atualizacao->execute();
+            $senhaValida = true;
+        }
+
+        if (!$senhaValida) {
+            return false;
+        }
+
+        unset($administrador['admSenha']);
+        $resultado = $this->conn->query('SELECT admCodigo, admNome FROM adm WHERE admCodigo = ' . (int) $administrador['admCodigo']);
+        return $resultado;
     }
     public function consulta($sql) {
         $result = $this->conn->query($sql);
