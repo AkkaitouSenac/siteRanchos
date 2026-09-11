@@ -7,7 +7,7 @@ try {
     $conexao = new Conexao();
     $ranchos = $conexao->consultaPreparada(
         'SELECT r.ranCodigo, r.proCodigo, r.assCodigo, r.titulo, r.descricao, r.cidade,
-                valorDiaria, contato, capacidadePessoas, endereco, qtdQuartos,
+                valorDiaria, contato, capacidadePessoas, dataCriacao,
                 dataExpiracao, ativo,
                 (SELECT i.imagem FROM imagensrancho i
                  WHERE i.ranCodigo = r.ranCodigo ORDER BY i.imgCodigo DESC LIMIT 1) AS imagem
