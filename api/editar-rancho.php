@@ -55,6 +55,34 @@ try {
             'proCodigo' => $proprietario,
         ]
     );
+    $ordem = $_POST['ordemImagens'] ?? [];
+    if (!is_array($ordem)) {
+        $ordem = [$ordem];
+    }
+    $imagens = $conexao->consultaPreparada(
+        'SELECT imgCodigo FROM imagensrancho
+         WHERE ranCodigo = :ranCodigo ORDER BY imgCodigo',
+        ['ranCodigo' => $codigo]
+    )->fetchAll(PDO::FETCH_COLUMN);
+    $imagens = array_map('intval', $imagens);
+    $ordem = array_values(array_unique(array_map('intval', $ordem)));
+    if ($ordem && count($ordem) === count($imagens) && !array_diff($ordem, $imagens)) {
+        foreach ($imagens as $indice => $imagemCodigo) {
+            $conexao->executarPreparado(
+                'UPDATE imagensrancho SET imgCodigo = :temporario WHERE imgCodigo = :codigo',
+                ['temporario' => -1000000000 - $indice, 'codigo' => $imagemCodigo]
+            );
+        }
+        foreach ($ordem as $indice => $imagemCodigo) {
+            $conexao->executarPreparado(
+                'UPDATE imagensrancho SET imgCodigo = :novoCodigo WHERE imgCodigo = :temporario',
+                [
+                    'novoCodigo' => $imagens[$indice],
+                    'temporario' => -1000000000 - array_search($imagemCodigo, $imagens, true),
+                ]
+            );
+        }
+    }
     respostaEdicao(
         $ok ? ['ok' => true] : ['erro' => 'Não foi possível editar o anúncio.'],
         $ok ? 200 : 422
