@@ -1,105 +1,154 @@
 <?php
 
-class Conexao {
-    private $host = "localhost";
-    private $usuario = "root";
-    private $senha = "1234";
-    private $banco = "ranchos";
-    private $conn;
+class Conexao
+{
+    private string $host = 'localhost';
+    private string $usuario = 'root';
+    private string $senha = '1234';
+    private string $banco = 'ranchos';
+    private PDO $conn;
 
-    public function __construct(){
-        $this->conn = new mysqli($this->host, $this->usuario, $this->senha, $this->banco);
-        if ($this->conn->connect_error) {
-            die("Falha na conexão: " . $this->conn->connect_error);
-        }
-        $this->conn->set_charset('utf8mb4');
+    private array $tabelasPermitidas = [
+        'adm',
+        'assinatura',
+        'imagensrancho',
+        'log',
+        'proprietario',
+        'rancho',
+        'visitas',
+    ];
+
+    public function __construct()
+    {
+        $dsn = "mysql:host={$this->host};dbname={$this->banco};charset=utf8mb4";
+        $this->conn = new PDO($dsn, $this->usuario, $this->senha, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false,
+        ]);
     }
-    public function login($email, $senha) {
-        $stmt = $this->conn->prepare('SELECT admCodigo, admNome, admSenha FROM adm WHERE admEmail = ?');
-        if (!$stmt) {
-            return false;
-        }
-        $stmt->bind_param('s', $email);
-        $stmt->execute();
-        $resultado = $stmt->get_result();
-        $administrador = $resultado->fetch_assoc();
+
+    public function login(string $email, string $senha): ?array
+    {
+        $stmt = $this->conn->prepare(
+            'SELECT admCodigo, admNome, admSenha FROM adm WHERE admEmail = :email LIMIT 1'
+        );
+        $stmt->execute(['email' => $email]);
+        $administrador = $stmt->fetch();
+
         if (!$administrador) {
-            return false;
+            return null;
         }
 
         $senhaValida = password_verify($senha, $administrador['admSenha']);
-        if (!$senhaValida && hash_equals($administrador['admSenha'], $senha)) {
+        if (!$senhaValida && hash_equals((string) $administrador['admSenha'], $senha)) {
             $novoHash = password_hash($senha, PASSWORD_DEFAULT);
-            $atualizacao = $this->conn->prepare('UPDATE adm SET admSenha = ? WHERE admCodigo = ?');
-            $atualizacao->bind_param('si', $novoHash, $administrador['admCodigo']);
-            $atualizacao->execute();
+            $atualizacao = $this->conn->prepare(
+                'UPDATE adm SET admSenha = :senha WHERE admCodigo = :codigo'
+            );
+            $atualizacao->execute([
+                'senha' => $novoHash,
+                'codigo' => (int) $administrador['admCodigo'],
+            ]);
             $senhaValida = true;
         }
 
         if (!$senhaValida) {
-            return false;
+            return null;
         }
 
-        unset($administrador['admSenha']);
-        $resultado = $this->conn->query('SELECT admCodigo, admNome FROM adm WHERE admCodigo = ' . (int) $administrador['admCodigo']);
-        return $resultado;
+        return [
+            'admCodigo' => (int) $administrador['admCodigo'],
+            'admNome' => $administrador['admNome'],
+        ];
     }
-    public function consulta($sql) {
-        $result = $this->conn->query($sql);
-        return $result;
+
+    public function consulta(string $sql): PDOStatement
+    {
+        return $this->conn->query($sql);
     }
-    public function escapar($valor) {
-        return $this->conn->real_escape_string((string) $valor);
+
+    public function escapar($valor): string
+    {
+        return str_replace(
+            ["\\", "'"],
+            ["\\\\", "''"],
+            (string) $valor
+        );
     }
-    public function consultaAvancada(string $tabela, string $colunas, $condicao = null) {
-        $sql = "SELECT $colunas FROM $tabela";
-        if ($condicao !== null) {
-            $sql .= " WHERE $condicao";
+
+    public function consultaAvancada(string $tabela, string $colunas, ?string $condicao = null): PDOStatement
+    {
+        $this->validarTabela($tabela);
+        $this->validarListaSql($colunas);
+
+        $sql = "SELECT {$colunas} FROM {$tabela}";
+        if ($condicao !== null && trim($condicao) !== '') {
+            $sql .= " WHERE {$condicao}";
         }
-        $result = $this->conn->query($sql);
-        return $result;
+
+        return $this->conn->query($sql);
     }
-    public function salvar($tabela, $campos, $valores) {
-        try {
-            $this->conn->begin_transaction();
-            $sql = "INSERT INTO $tabela ($campos) VALUES ($valores)";
-            if ($this->conn->query($sql) === TRUE) {
-                $this->conn->commit();
-                return true;
-            } 
-        } catch (Exception $e) {
-            $this->conn->rollback();
-            return false;
-        }
+
+    public function salvar(string $tabela, string $campos, string $valores): bool
+    {
+        $this->validarTabela($tabela);
+        $this->validarListaSql($campos);
+        $this->validarListaSql($valores);
+
+        return $this->executarTransacao(
+            "INSERT INTO {$tabela} ({$campos}) VALUES ({$valores})"
+        );
     }
-    public function atualizar($tabela, $camposValores, $condicao) {
-        try {
-            $this->conn->begin_transaction();
-            $sql = "UPDATE $tabela SET $camposValores WHERE $condicao";
-            if ($this->conn->query($sql) === TRUE) {
-                $this->conn->commit();
-                return true;
-            } 
-        } catch (Exception $e) {
-            $this->conn->rollback();
-            return false;
-        }
+
+    public function atualizar(string $tabela, string $camposValores, string $condicao): bool
+    {
+        $this->validarTabela($tabela);
+        $this->validarListaSql($camposValores);
+        $this->validarListaSql($condicao);
+
+        return $this->executarTransacao(
+            "UPDATE {$tabela} SET {$camposValores} WHERE {$condicao}"
+        );
     }
-    public function remover($tabela, $condicao) {
+
+    public function remover(string $tabela, string $condicao): bool
+    {
+        $this->validarTabela($tabela);
+        $this->validarListaSql($condicao);
+
+        return $this->executarTransacao(
+            "DELETE FROM {$tabela} WHERE {$condicao}"
+        );
+    }
+
+    private function executarTransacao(string $sql): bool
+    {
         try {
-            $this->conn->begin_transaction();
-            $sql = "DELETE FROM $tabela WHERE $condicao";
-            if ($this->conn->query($sql) === TRUE) {
-                $this->conn->commit();
-                return true;
-            } 
-        } catch (Exception $e) {
-            $this->conn->rollback();
+            $this->conn->beginTransaction();
+            $this->conn->exec($sql);
+            $this->conn->commit();
+            return true;
+        } catch (Throwable $erro) {
+            if ($this->conn->inTransaction()) {
+                $this->conn->rollBack();
+            }
+            error_log('Falha na operação do banco: ' . $erro->getMessage());
             return false;
         }
     }
 
-    public function __destruct() {
-        $this->conn->close();
+    private function validarTabela(string $tabela): void
+    {
+        if (!in_array($tabela, $this->tabelasPermitidas, true)) {
+            throw new InvalidArgumentException('Tabela não permitida.');
+        }
+    }
+
+    private function validarListaSql(string $sql): void
+    {
+        if (preg_match('/(;|--|\/\*|\*\/|#)/', $sql)) {
+            throw new InvalidArgumentException('SQL inválido.');
+        }
     }
 }
