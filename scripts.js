@@ -11,6 +11,7 @@ const somarDias = (data, dias) => {
 };
 
 const listings = document.getElementById('listings');
+const featuredListings = document.getElementById('featuredListings');
 const searchText = document.getElementById('searchText');
 const locationSelect = document.getElementById('locationSelect');
 const priceRange = document.getElementById('priceRange');
@@ -109,6 +110,15 @@ const renderListings = (items) => {
     items.forEach(item => listings.appendChild(createListingCard(item)));
 };
 
+const renderFeaturedListings = () => {
+    if (!featuredListings) return;
+    featuredListings.textContent = '';
+    ranchos
+        .filter((rancho) => rancho.ativo && rancho.dataExpiracao > new Date())
+        .slice(0, 3)
+        .forEach((rancho) => featuredListings.appendChild(createListingCard(rancho)));
+};
+
 const updateFilters = () => {
     const search = searchText.value.toLowerCase();
     const location = locationSelect.value;
@@ -141,6 +151,7 @@ const updateFilters = () => {
 filterForm.addEventListener('submit', (event) => {
     event.preventDefault();
     updateFilters();
+    renderFeaturedListings();
 });
 priceRange.addEventListener('input', () => {
     priceValue.textContent = `R$ ${priceRange.value}`;

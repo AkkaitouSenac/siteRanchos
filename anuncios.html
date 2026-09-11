@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://cdn.jsdelivr.net; script-src 'self' https://cdn.jsdelivr.net; font-src 'self' https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self';">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anúncios - Ranchos Araçatuba & Região</title>
+    <title>Ranchos - Ranchos Araçatuba & Região</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous"
         referrerpolicy="no-referrer">
@@ -18,7 +18,7 @@
         <div class="container">
             <nav class="navbar navbar-expand-lg navbar-dark">
                 <div class="d-flex align-items-center w-100 flex-wrap">
-                    <a class="navbar-brand fw-bold me-auto" href="index.php">Ranchos Araçatuba &
+                    <a class="navbar-brand fw-bold me-auto" href="anuncios.html">Ranchos Araçatuba &
                         Região</a>
                     <button class="navbar-toggler order-3" type="button" data-bs-toggle="collapse"
                         data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false"
@@ -27,9 +27,9 @@
                     </button>
                     <div class="collapse navbar-collapse order-4" id="navMenu">
                         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                            <li class="nav-item"><a class="nav-link text-white" href="index.php">Início</a></li>
+                            <li class="nav-item"><a class="nav-link text-white" href="anuncios.html">Início</a></li>
                             <li class="nav-item"><a class="nav-link text-white" href="sobre.html">Sobre</a></li>
-                            <li class="nav-item"><a class="nav-link text-white" href="anuncios.html">Anúncios</a>
+                            <li class="nav-item"><a class="nav-link text-white" href="anuncios.html">Ranchos</a>
                             </li>
                             <li class="nav-item"><a class="nav-link text-white" href="contato.html">Contato</a>
                             </li>
@@ -43,15 +43,21 @@
 
     <main class="container py-5">
         <section class="mb-4">
-            <h1>Anúncios de ranchos</h1>
+            <h1>Ranchos para alugar</h1>
             <p>Use os filtros abaixo para encontrar ranchos por local, preço e capacidade. Para divulgar o seu
                 rancho, clique em <strong>Entrar</strong> no topo da tela.</p>
+        </section>
+
+        <section class="mb-5">
+            <h2 class="h3">Ranchos em destaque</h2>
+            <p class="text-muted">Confira os ranchos disponíveis antes de aplicar os filtros.</p>
+            <div id="featuredListings" class="row g-4"></div>
         </section>
 
         <ul class="nav nav-tabs mb-4" id="adTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="browse-tab" data-bs-toggle="tab" data-bs-target="#browse"
-                    type="button" role="tab" aria-controls="browse" aria-selected="true">Buscar anúncios</button>
+                    type="button" role="tab" aria-controls="browse" aria-selected="true">                    Buscar ranchos</button>
             </li>
             <li class="nav-item d-none" id="painelTabItem" role="presentation">
                 <button class="nav-link" id="painel-tab" data-bs-toggle="tab" data-bs-target="#painel" type="button"
@@ -273,7 +279,7 @@
 
     <footer class="bg-white py-4 border-top">
         <div class="container text-center text-muted">
-            <p class="mb-0">© 2026 Ranchos Araçatuba & Região</p>
+            <p class="mb-0">© 2026 Ranchos Araçatuba & Região. Divulgação de ranchos de aluguel sem cadastro para visitantes.</p>
         </div>
     </footer>
 
