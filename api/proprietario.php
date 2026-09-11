@@ -48,10 +48,16 @@ try {
             respostaJson(['erro' => 'Preencha os dados corretamente.'], 422);
         }
 
+        $novoCodigo = (int) $conexao->consultaPreparada(
+            'SELECT COALESCE(MAX(proCodigo), 0) + 1 FROM proprietario'
+        )->fetchColumn();
         $ok = $conexao->executarPreparado(
-            'INSERT INTO proprietario (nome, email, telefone, senha, dataCadastro)
-             VALUES (:nome, :email, :telefone, :senha, NOW())',
+            'INSERT INTO proprietario
+                (proCodigo, nome, email, telefone, senha, dataCadastro)
+             VALUES
+                (:proCodigo, :nome, :email, :telefone, :senha, NOW())',
             [
+                'proCodigo' => $novoCodigo,
                 'nome' => $nome,
                 'email' => $email,
                 'telefone' => $telefone,
