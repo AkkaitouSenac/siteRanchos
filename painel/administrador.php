@@ -14,6 +14,10 @@ include 'classe/conexao.php';
 $obj = new Conexao();
 $arquivoAtual = basename($_SERVER['SCRIPT_NAME']);
 $item = $_GET['item'] ?? 'listar';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Conexao::validarCsrf($_POST['_csrf'] ?? null)) {
+    header("Location: $arquivoAtual?item=listar&erro=csrf");
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -40,6 +44,7 @@ $item = $_GET['item'] ?? 'listar';
                 if ($item == 'listar') {
                 ?>
                     <form action="administrador.php?item=remover" method="POST">
+                        <input type="hidden" name="_csrf" value="<?php echo htmlspecialchars(Conexao::csrfToken(), ENT_QUOTES, 'UTF-8'); ?>">
                         <!-- <i title="Remover <?php echo $titulo; ?>" class="bi bi-dash-square-fill" style="font-size: 30px; color: red;"></i> -->
                         <button type="submit" class="btn btn-danger">-</button>
                         <i onclick="location.href='<?php echo $arquivoAtual; ?>?item=adicionar'" title="Adicionar <?php echo $titulo; ?>" class="bi bi-plus-square-fill" style="font-size: 30px; color: green;"></i>
@@ -126,6 +131,7 @@ $item = $_GET['item'] ?? 'listar';
                         }
                         ?>
                         <form class="row g-3" method="POST" action="<?php echo $arquivoAtual; ?>?item=salvar">
+                            <input type="hidden" name="_csrf" value="<?php echo htmlspecialchars(Conexao::csrfToken(), ENT_QUOTES, 'UTF-8'); ?>">
                             <input type="hidden" name="<?php echo $chavePrimaria; ?>" value="<?php echo isset($codigo) ? $codigo : ''; ?>">
                             <div class="col-md-6">
                                 <label for="inputEmail4" class="form-label">Email</label>
@@ -157,6 +163,7 @@ $item = $_GET['item'] ?? 'listar';
                         $valores = "'$admEmail', '$admSenha', '$admNome'";
                         $resposta = $obj->salvar($table, $campos, $valores);
                         if ($resposta) {
+                            $obj->registrarLog((int) $_SESSION['admCodigo'], 'adm', 'INSERT', null, "INSERT INTO adm ($campos) VALUES (...)");
                             header("Location: $arquivoAtual?item=listar&sucesso=1");
                             exit();
                         } else {
@@ -173,6 +180,7 @@ $item = $_GET['item'] ?? 'listar';
                         $resposta = $obj->atualizar($table, $camposValores, $condicao);
 
                         if ($resposta) {
+                            $obj->registrarLog((int) $_SESSION['admCodigo'], 'adm', 'UPDATE', (int) $codigo, "UPDATE adm SET $camposValores WHERE $condicao");
                             header("Location: $arquivoAtual?item=listar&sucesso=2");
                             exit();
                         } else {
@@ -214,6 +222,9 @@ $item = $_GET['item'] ?? 'listar';
                     $resposta = $obj->remover($table, "$chavePrimaria IN ({$_SESSION['CodigoParaRemover']})");
                     unset($_SESSION['CodigoParaRemover']);
                     if ($resposta) {
+                        foreach (explode(',', $_SESSION['CodigoParaRemover']) as $id) {
+                            $obj->registrarLog((int) $_SESSION['admCodigo'], 'adm', 'DELETE', (int) $id);
+                        }
                         header("Location: $arquivoAtual?item=listar&sucesso=3");
                         exit();
                     } else {

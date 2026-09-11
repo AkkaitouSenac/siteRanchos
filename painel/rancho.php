@@ -11,6 +11,10 @@ $arquivoAtual = basename($_SERVER['SCRIPT_NAME']);
 $item = $_GET['item'] ?? 'listar';
 $codigo = $_GET['codigo'] ?? null;
 $camposLista = 'ranCodigo, titulo, cidade, valorDiaria, capacidadePessoas, qtdQuartos, ativo';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Conexao::validarCsrf($_POST['_csrf'] ?? null)) {
+    header("Location: $arquivoAtual?item=listar&erro=csrf");
+    exit();
+}
 
 function escaparValor(Conexao $obj, $valor): string
 {
@@ -39,11 +43,17 @@ if ($item === 'salvar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($ranCodigo === '') {
         $resposta = $obj->salvar('rancho', $campos, $valores);
+        if ($resposta) {
+            $obj->registrarLog((int) $_SESSION['admCodigo'], 'rancho', 'INSERT', null, "INSERT INTO rancho ($campos) VALUES (...)");
+        }
         $destino = $resposta ? "$arquivoAtual?item=listar&sucesso=1" : "$arquivoAtual?item=adicionar&erro=1";
     } else {
         $ranCodigo = escaparValor($obj, $ranCodigo);
         $camposValores = "proCodigo = $proCodigoSql, assCodigo = $assCodigoSql, titulo = '$titulo', descricao = '$descricao', cidade = '$cidade', valorDiaria = '$valorDiaria', contato = '$contato', capacidadePessoas = '$capacidadePessoas', endereco = '$endereco', qtdQuartos = '$qtdQuartos', dataExpiracao = '$dataExpiracao', ativo = $ativo";
         $resposta = $obj->atualizar('rancho', $camposValores, "ranCodigo = '$ranCodigo'");
+        if ($resposta) {
+            $obj->registrarLog((int) $_SESSION['admCodigo'], 'rancho', 'UPDATE', (int) $ranCodigo, "UPDATE rancho SET $camposValores WHERE ranCodigo = ?");
+        }
         $destino = $resposta ? "$arquivoAtual?item=listar&sucesso=2" : "$arquivoAtual?item=adicionar&erro=1&codigo=$ranCodigo";
     }
     header("Location: $destino");
@@ -58,6 +68,11 @@ if ($item === 'remover' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
     $resposta = $obj->remover('rancho', 'ranCodigo IN (' . implode(',', $codigos) . ')');
+    if ($resposta) {
+        foreach ($codigos as $id) {
+            $obj->registrarLog((int) $_SESSION['admCodigo'], 'rancho', 'DELETE', $id);
+        }
+    }
     header("Location: $arquivoAtual?item=listar&sucesso=" . ($resposta ? '3' : '4'));
     exit();
 }
@@ -99,6 +114,7 @@ if ($item === 'adicionar' && $codigo !== null) {
 
             <?php if ($item === 'adicionar'): ?>
                 <form method="POST" action="<?php echo $arquivoAtual; ?>?item=salvar" class="row g-3">
+                    <input type="hidden" name="_csrf" value="<?php echo htmlspecialchars(Conexao::csrfToken(), ENT_QUOTES, 'UTF-8'); ?>">
                     <input type="hidden" name="ranCodigo" value="<?php echo htmlspecialchars($rancho['ranCodigo']); ?>">
                     <?php
                     $campos = [
@@ -128,6 +144,7 @@ if ($item === 'adicionar' && $codigo !== null) {
             <?php else: ?>
                 <p><a class="btn btn-primary" href="<?php echo $arquivoAtual; ?>?item=adicionar">Adicionar rancho</a></p>
                 <form method="POST" action="<?php echo $arquivoAtual; ?>?item=remover">
+                    <input type="hidden" name="_csrf" value="<?php echo htmlspecialchars(Conexao::csrfToken(), ENT_QUOTES, 'UTF-8'); ?>">
                     <button class="btn btn-danger mb-3" type="submit">Remover selecionados</button>
                     <table class="table table-hover">
                         <thead><tr><th></th><th>Código</th><th>Título</th><th>Cidade</th><th>Diária</th><th>Status</th><th></th></tr></thead>
