@@ -14,13 +14,13 @@
 - Login com prepared statement.
 - Regeneração do ID da sessão após autenticação.
 - Cabeçalho padronizado nas páginas públicas.
+- Anúncios públicos carregados do banco de dados, considerando somente ranchos ativos e dentro da validade.
 
 ### Ainda não implementado
 
-- Persistência do frontend público no banco.
+- Login e publicação de anúncios pelo frontend público ainda precisam ser integrados ao banco.
 - Envio ou gravação do formulário de contato.
 - Upload de imagens dos ranchos.
-- Persistência completa do frontend público no banco.
 - Envio ou gravação do formulário de contato.
 - Registro de todas as operações restantes no sistema de logs.
 

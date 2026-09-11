@@ -1,99 +1,20 @@
-const assinaturas = [
-    { assCodigo: 1, nome: 'Bimestral', dias: 60, valor: 129 },
-    { assCodigo: 2, nome: 'Trimestral', dias: 90, valor: 179 },
-    { assCodigo: 3, nome: 'Semestral', dias: 180, valor: 319 },
-    { assCodigo: 4, nome: 'Anual', dias: 365, valor: 549 },
-    { assCodigo: 5, nome: 'Trienal', dias: 1095, valor: 1299 }
-];
-
-const diasAtras = (n) => {
-    const d = new Date();
-    d.setDate(d.getDate() - n);
-    return d;
-};
-
-const somarDias = (data, dias) => {
-    const d = new Date(data);
-    d.setDate(d.getDate() + dias);
-    return d;
-};
+let assinaturas = [];
 
 const owners = [
     { proCodigo: 1, nome: 'Carlos Mendes', email: 'carlos@exemplo.com', telefone: '(18) 99999-1111', senha: '1234' },
     { proCodigo: 2, nome: 'Fernanda Silva', email: 'fernanda@exemplo.com', telefone: '(18) 99999-2222', senha: '1234' }
 ];
 
-const ranchos = [
-    {
-        ranCodigo: 1,
-        proCodigo: 1,
-        titulo: 'Rancho do Bosque',
-        descricao: 'Beira de lago, 3 quartos, cozinha equipada, área externa para churrasco e acesso fácil à cidade.',
-        cidade: 'Araçatuba',
-        valorDiaria: 800,
-        contato: '(18) 99888-1010',
-        capacidadePessoas: 8,
-        endereco: 'Estrada Municipal, km 4',
-        qtdQuartos: 3,
-        assCodigo: 4,
-        dataCriacao: diasAtras(100),
-        ativo: true
-    },
-    {
-        ranCodigo: 2,
-        proCodigo: 1,
-        titulo: 'Rancho dos Amigos',
-        descricao: 'Áreas verdes, acomodação para 12 pessoas, banheiro com água quente e estacionamento privativo.',
-        cidade: 'Bento de Abreu',
-        valorDiaria: 1050,
-        contato: '(18) 99888-2020',
-        capacidadePessoas: 12,
-        endereco: 'Rodovia Vicinal, s/n',
-        qtdQuartos: 4,
-        assCodigo: 1,
-        dataCriacao: diasAtras(55),
-        ativo: true
-    },
-    {
-        ranCodigo: 3,
-        proCodigo: 2,
-        titulo: 'Rancho Vila Verde',
-        descricao: 'Espaço tranquilo com fogão a lenha, rede, piscina exclusiva e suporte para eventos de fim de semana.',
-        cidade: 'Valparaíso',
-        valorDiaria: 950,
-        contato: '(18) 99888-3030',
-        capacidadePessoas: 10,
-        endereco: 'Chácara Vila Verde, lote 12',
-        qtdQuartos: 3,
-        assCodigo: 5,
-        dataCriacao: diasAtras(30),
-        ativo: true
-    },
-    {
-        ranCodigo: 4,
-        proCodigo: 2,
-        titulo: 'Rancho Recanto Sul',
-        descricao: 'Casa com varanda ampla, rede de descanso, cozinha completa e localização próxima à rodovia.',
-        cidade: 'Birigui',
-        valorDiaria: 870,
-        contato: '(18) 99888-4040',
-        capacidadePessoas: 6,
-        endereco: 'Av. Recanto Sul, 220',
-        qtdQuartos: 2,
-        assCodigo: 2,
-        dataCriacao: diasAtras(100),
-        ativo: true
-    }
-];
-
-ranchos.forEach(r => {
-    const plano = assinaturas.find(a => a.assCodigo === r.assCodigo);
-    r.dataExpiracao = somarDias(r.dataCriacao, plano ? plano.dias : 0);
-});
-
-let nextRanCodigo = ranchos.length + 1;
+let ranchos = [];
+let nextRanCodigo = 1;
 let nextProCodigo = owners.length + 1;
 let activeOwner = null;
+
+const somarDias = (data, dias) => {
+    const resultado = new Date(data);
+    resultado.setDate(resultado.getDate() + Number(dias));
+    return resultado;
+};
 
 const listings = document.getElementById('listings');
 const searchText = document.getElementById('searchText');
@@ -224,6 +145,47 @@ clearFilters.addEventListener('click', () => {
 });
 
 const findOwnerByEmail = (email) => owners.find(o => o.email.toLowerCase() === email.toLowerCase());
+
+const carregarDadosPublicos = async () => {
+    try {
+        const resposta = await fetch('api/anuncios.php', {
+            headers: { Accept: 'application/json' }
+        });
+        if (!resposta.ok) {
+            throw new Error('Falha ao carregar os anúncios.');
+        }
+
+        const dados = await resposta.json();
+        ranchos = Array.isArray(dados.ranchos) ? dados.ranchos.map((rancho) => ({
+            ...rancho,
+            ranCodigo: Number(rancho.ranCodigo),
+            proCodigo: rancho.proCodigo === null ? null : Number(rancho.proCodigo),
+            assCodigo: rancho.assCodigo === null ? null : Number(rancho.assCodigo),
+            valorDiaria: Number(rancho.valorDiaria),
+            capacidadePessoas: Number(rancho.capacidadePessoas),
+            ativo: Number(rancho.ativo) === 1,
+            dataExpiracao: new Date(`${rancho.dataExpiracao}T23:59:59`)
+        })) : [];
+        assinaturas = Array.isArray(dados.assinaturas) ? dados.assinaturas.map((plano) => ({
+            ...plano,
+            assCodigo: Number(plano.assCodigo),
+            dias: Number(plano.dias),
+            valor: Number(plano.valor)
+        })) : [];
+        nextRanCodigo = ranchos.reduce((maior, rancho) => Math.max(maior, rancho.ranCodigo), 0) + 1;
+        updateFilters();
+    } catch (erro) {
+        console.error(erro);
+        renderListings([{
+            titulo: 'Não foi possível carregar os anúncios',
+            descricao: 'Verifique a conexão com o banco de dados e tente novamente.',
+            cidade: '',
+            valorDiaria: '-',
+            capacidadePessoas: '-',
+            contato: ''
+        }]);
+    }
+};
 
 const renderAuthArea = () => {
     authArea.textContent = '';
@@ -492,6 +454,7 @@ listingForm.addEventListener('submit', (event) => {
 
 renderAuthArea();
 updateFilters();
+carregarDadosPublicos();
 
 const params = new URLSearchParams(window.location.search);
 if (params.get('login') === '1' && authModal) {
