@@ -12,16 +12,23 @@ class Conexao {
         if ($this->conn->connect_error) {
             die("Falha na conexão: " . $this->conn->connect_error);
         }
-        return $this->conn;
+        $this->conn->set_charset('utf8mb4');
     }
     public function login($email, $senha) {
-        $sql = "SELECT admCodigo, admNome FROM adm WHERE admEmail = '$email' AND admSenha = '$senha'";
-        $result = $this->conn->query($sql);
-        return $result;
+        $stmt = $this->conn->prepare('SELECT admCodigo, admNome FROM adm WHERE admEmail = ? AND admSenha = ?');
+        if (!$stmt) {
+            return false;
+        }
+        $stmt->bind_param('ss', $email, $senha);
+        $stmt->execute();
+        return $stmt->get_result();
     }
     public function consulta($sql) {
         $result = $this->conn->query($sql);
         return $result;
+    }
+    public function escapar($valor) {
+        return $this->conn->real_escape_string((string) $valor);
     }
     public function consultaAvancada(string $tabela, string $colunas, $condicao = null) {
         $sql = "SELECT $colunas FROM $tabela";

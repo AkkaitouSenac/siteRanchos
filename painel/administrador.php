@@ -1,4 +1,5 @@
 <?php
+ob_start();
 session_start();
 if (!isset($_SESSION['admCodigo'])) {
     header("Location: login.php");
@@ -12,6 +13,7 @@ $chavePrimaria = "admCodigo";
 include 'classe/conexao.php';
 $obj = new Conexao();
 $arquivoAtual = basename($_SERVER['SCRIPT_NAME']);
+$item = $_GET['item'] ?? 'listar';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -35,7 +37,7 @@ $arquivoAtual = basename($_SERVER['SCRIPT_NAME']);
             <div class="col-10" style="text-align: left;">
                 <h1><?php echo $titulo; ?></h1>
                 <?php
-                if (isset($_GET['item']) and $_GET['item'] == 'listar') {
+                if ($item == 'listar') {
                 ?>
                     <form action="administrador.php?item=remover" method="POST">
                         <!-- <i title="Remover <?php echo $titulo; ?>" class="bi bi-dash-square-fill" style="font-size: 30px; color: red;"></i> -->
@@ -102,7 +104,7 @@ $arquivoAtual = basename($_SERVER['SCRIPT_NAME']);
                             </tbody>
                         </table>
                     </form>
-                <?php } else if ($_GET['item'] == 'adicionar') { ?>
+                <?php } else if ($item == 'adicionar') { ?>
                     <div class="container-fluid">
                         <?php if (isset($_GET['erro']) and $_GET['erro'] == 1) { ?>
                             <div class="alert alert-danger" role="alert">
@@ -110,7 +112,7 @@ $arquivoAtual = basename($_SERVER['SCRIPT_NAME']);
                             </div>
                         <?php }
                         if (isset($_GET['codigo'])) {
-                            $codigo = $_GET['codigo'];
+                            $codigo = $obj->escapar($_GET['codigo']);
                             $resultado = $obj->consultaAvancada($table, $colunas, "$chavePrimaria = '$codigo'");
                             if ($linha = $resultado->fetch_assoc()) {
                                 $admEmail = $linha['admEmail'];
@@ -142,14 +144,14 @@ $arquivoAtual = basename($_SERVER['SCRIPT_NAME']);
                             </div>
                         </form>
                     </div>
-                <?php } else if ($_GET['item'] == 'salvar') {
-                    $admEmail = $_POST['admEmail'];
-                    $admSenha = $_POST['admSenha'];
-                    $admNome = $_POST['admNome'];
+                <?php } else if ($item == 'salvar') {
+                    $admEmail = $obj->escapar($_POST['admEmail'] ?? '');
+                    $admSenha = $obj->escapar($_POST['admSenha'] ?? '');
+                    $admNome = $obj->escapar($_POST['admNome'] ?? '');
                     $campos = "admEmail, admSenha, admNome";
                     $valores = "'$admEmail', '$admSenha', '$admNome'";
                     if (isset($_POST[$chavePrimaria])) {
-                        $codigo = $_POST[$chavePrimaria];
+                        $codigo = $obj->escapar($_POST[$chavePrimaria]);
                     }
                     if (!isset($codigo)) {
                         $resposta = $obj->salvar($table, $campos, $valores);
@@ -170,8 +172,13 @@ $arquivoAtual = basename($_SERVER['SCRIPT_NAME']);
                             header("Location: $arquivoAtual?item=adicionar&erro=1&codigo=$codigo");
                         }
                     }
-                } else if ($_GET['item'] == 'remover') {
-                    $codigosChave = implode(',', $_POST['admCodigo']);
+                } else if ($item == 'remover') {
+                    $codigosSelecionados = $_POST['admCodigo'] ?? [];
+                    if (!$codigosSelecionados) {
+                        header("Location: $arquivoAtual?item=listar&erro=selecao");
+                        exit();
+                    }
+                    $codigosChave = implode(',', array_map('intval', $codigosSelecionados));
                     $resposta = $obj->consultaAvancada($table, "admCodigo, admNome", "$chavePrimaria IN ($codigosChave)");
                     ?>
                     <table class="table table-hover">
@@ -195,7 +202,7 @@ $arquivoAtual = basename($_SERVER['SCRIPT_NAME']);
                     </table>
                     <button type="button" class="btn btn-danger" onclick="location.href='<?php echo $arquivoAtual; ?>?item=confirmarRemover'">Confirmar Remoção</button>
 <?php
-                } else if ($_GET['item'] == 'confirmarRemover') {
+                } else if ($item == 'confirmarRemover' && !empty($_SESSION['CodigoParaRemover'])) {
                     $resposta = $obj->remover($table, "$chavePrimaria IN ({$_SESSION['CodigoParaRemover']})");
                     unset($_SESSION['CodigoParaRemover']);
                     if ($resposta) {
