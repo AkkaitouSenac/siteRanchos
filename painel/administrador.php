@@ -151,19 +151,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Conexao::validarCsrf($_POST['_csrf
                         </form>
                     </div>
                 <?php } else if ($item == 'salvar') {
-                    $admEmail = $obj->escapar($_POST['admEmail'] ?? '');
+                    $admEmail = trim((string) ($_POST['admEmail'] ?? ''));
                     $senhaRecebida = $_POST['admSenha'] ?? '';
-                    $admNome = $obj->escapar($_POST['admNome'] ?? '');
-                    $admSenha = $senhaRecebida !== '' ? $obj->escapar(password_hash($senhaRecebida, PASSWORD_DEFAULT)) : '';
-                    if (isset($_POST[$chavePrimaria])) {
+                    $admNome = trim((string) ($_POST['admNome'] ?? ''));
+                    $admSenha = $senhaRecebida !== '' ? password_hash($senhaRecebida, PASSWORD_DEFAULT) : '';
+                    if (!empty($_POST[$chavePrimaria])) {
                         $codigo = $obj->escapar($_POST[$chavePrimaria]);
                     }
                     if (!isset($codigo)) {
-                        $campos = "admEmail, admSenha, admNome";
-                        $valores = "'$admEmail', '$admSenha', '$admNome'";
-                        $resposta = $obj->salvar($table, $campos, $valores);
+                        $sql = 'INSERT INTO adm (admEmail, admSenha, admNome)
+                                VALUES (:email, :senha, :nome)';
+                        $resposta = $obj->executarPreparado($sql, [
+                            'email' => $admEmail,
+                            'senha' => $admSenha,
+                            'nome' => $admNome,
+                        ]);
                         if ($resposta) {
-                            $obj->registrarLog((int) $_SESSION['admCodigo'], 'adm', 'INSERT', null, "INSERT INTO adm ($campos) VALUES (...)");
+                            $obj->registrarLog((int) $_SESSION['admCodigo'], 'adm', 'INSERT', null, $sql);
                             header("Location: $arquivoAtual?item=listar&sucesso=1");
                             exit();
                         } else {
@@ -171,16 +175,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Conexao::validarCsrf($_POST['_csrf
                             exit();
                         }
                     } else {
-                        $codigo = $obj->escapar($_POST[$chavePrimaria] ?? '');
-                        $camposValores = "admEmail = '$admEmail', admNome = '$admNome'";
+                        $codigo = (int) $_POST[$chavePrimaria];
+                        $sql = 'UPDATE adm SET admEmail = :email, admNome = :nome';
+                        $parametros = [
+                            'email' => $admEmail,
+                            'nome' => $admNome,
+                            'codigo' => (int) $codigo,
+                        ];
                         if ($admSenha !== '') {
-                            $camposValores .= ", admSenha = '$admSenha'";
+                            $sql .= ', admSenha = :senha';
+                            $parametros['senha'] = $admSenha;
                         }
-                        $condicao = "$chavePrimaria = '$codigo'";
-                        $resposta = $obj->atualizar($table, $camposValores, $condicao);
+                        $sql .= ' WHERE admCodigo = :codigo';
+                        $resposta = $obj->executarPreparado($sql, $parametros);
 
                         if ($resposta) {
-                            $obj->registrarLog((int) $_SESSION['admCodigo'], 'adm', 'UPDATE', (int) $codigo, "UPDATE adm SET $camposValores WHERE $condicao");
+                            $obj->registrarLog((int) $_SESSION['admCodigo'], 'adm', 'UPDATE', (int) $codigo, $sql);
                             header("Location: $arquivoAtual?item=listar&sucesso=2");
                             exit();
                         } else {
