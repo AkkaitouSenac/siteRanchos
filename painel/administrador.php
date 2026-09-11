@@ -155,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Conexao::validarCsrf($_POST['_csrf
                     $senhaRecebida = $_POST['admSenha'] ?? '';
                     $admNome = $obj->escapar($_POST['admNome'] ?? '');
                     $admSenha = $senhaRecebida !== '' ? $obj->escapar(password_hash($senhaRecebida, PASSWORD_DEFAULT)) : '';
-                    if (isset($_POST[$chavePrimaria])) {
+                    if (!empty($_POST[$chavePrimaria])) {
                         $codigo = $obj->escapar($_POST[$chavePrimaria]);
                     }
                     if (!isset($codigo)) {
