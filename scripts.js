@@ -173,6 +173,7 @@ const carregarDadosPublicos = async () => {
             dias: Number(plano.dias),
             valor: Number(plano.valor)
         })) : [];
+        renderPlanOptions();
         nextRanCodigo = ranchos.reduce((maior, rancho) => Math.max(maior, rancho.ranCodigo), 0) + 1;
         updateFilters();
     } catch (erro) {
@@ -445,9 +446,9 @@ listingForm.addEventListener('submit', async (event) => {
     dados.append('contato', listingContato.value.trim());
     dados.append('capacidade', listingCapacity.value);
     dados.append('assCodigo', String(plano.assCodigo));
-    if (listingImagem.files[0]) {
-        dados.append('imagem', listingImagem.files[0]);
-    }
+    Array.from(listingImagem.files).forEach((arquivo) => {
+        dados.append('imagem[]', arquivo);
+    });
 
     try {
         const resposta = await fetch('api/publicar-rancho.php', {
