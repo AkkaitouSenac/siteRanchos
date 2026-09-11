@@ -11,6 +11,7 @@ const somarDias = (data, dias) => {
 };
 
 const listings = document.getElementById('listings');
+const featuredListings = document.getElementById('featuredListings');
 const searchText = document.getElementById('searchText');
 const locationSelect = document.getElementById('locationSelect');
 const priceRange = document.getElementById('priceRange');
@@ -109,6 +110,15 @@ const renderListings = (items) => {
     items.forEach(item => listings.appendChild(createListingCard(item)));
 };
 
+const renderFeaturedListings = () => {
+    if (!featuredListings) return;
+    featuredListings.textContent = '';
+    ranchos
+        .filter((rancho) => rancho.ativo && rancho.dataExpiracao > new Date())
+        .slice(0, 3)
+        .forEach((rancho) => featuredListings.appendChild(createListingCard(rancho)));
+};
+
 const updateFilters = () => {
     const search = searchText.value.toLowerCase();
     const location = locationSelect.value;
@@ -141,6 +151,7 @@ const updateFilters = () => {
 filterForm.addEventListener('submit', (event) => {
     event.preventDefault();
     updateFilters();
+    renderFeaturedListings();
 });
 priceRange.addEventListener('input', () => {
     priceValue.textContent = `R$ ${priceRange.value}`;
@@ -263,7 +274,14 @@ const restaurarSessao = async () => {
         });
         if (!resposta.ok) return;
         const dados = await resposta.json();
-        if (dados.proprietario) setActiveOwner(dados.proprietario);
+        if (dados.proprietario) {
+            setActiveOwner(dados.proprietario);
+        } else {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('login') === '1' && authModal) authModal.show();
+        }
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('area') === '1' && activeOwner) irParaPainel();
     } catch (erro) {
         console.error('Não foi possível restaurar a sessão do proprietário.', erro);
     }
@@ -494,6 +512,6 @@ carregarDadosPublicos();
 restaurarSessao();
 
 const params = new URLSearchParams(window.location.search);
-if (params.get('login') === '1' && authModal) {
-    authModal.show();
+if (params.get('area') === '1' && activeOwner) {
+    irParaPainel();
 }

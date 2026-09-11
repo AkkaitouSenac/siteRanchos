@@ -45,7 +45,10 @@ function h($valor): string
 <body>
     <header class="bg-primary text-white py-4">
         <div class="container">
-            <a class="navbar-brand text-white fw-bold" href="index.php">Ranchos Araçatuba & Região</a>
+            <div class="d-flex align-items-center w-100">
+                <a class="navbar-brand text-white fw-bold me-auto" href="anuncios.html">Ranchos Araçatuba & Região</a>
+                <div id="authArea"></div>
+            </div>
         </div>
     </header>
     <main class="container py-5">
@@ -77,5 +80,11 @@ function h($valor): string
             </article>
         <?php endif; ?>
     </main>
+    <footer class="bg-white py-4 border-top">
+        <div class="container text-center text-muted">
+            <p class="mb-0">© 2026 Ranchos Araçatuba & Região. Divulgação de ranchos de aluguel sem cadastro para visitantes.</p>
+        </div>
+    </footer>
+    <script src="session-header.js"></script>
 </body>
 </html>
