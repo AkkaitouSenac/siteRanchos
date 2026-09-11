@@ -8,6 +8,20 @@ class Conexao
     private string $banco = 'ranchos';
     private PDO $conn;
 
+    public static function csrfToken(): string
+    {
+        if (empty($_SESSION['_csrf'])) {
+            $_SESSION['_csrf'] = bin2hex(random_bytes(32));
+        }
+        return $_SESSION['_csrf'];
+    }
+
+    public static function validarCsrf(?string $token): bool
+    {
+        return !empty($_SESSION['_csrf']) && is_string($token)
+            && hash_equals($_SESSION['_csrf'], $token);
+    }
+
     private array $tabelasPermitidas = [
         'adm',
         'assinatura',
@@ -66,6 +80,45 @@ class Conexao
     public function consulta(string $sql): PDOStatement
     {
         return $this->conn->query($sql);
+    }
+
+    public function consultaPreparada(string $sql, array $parametros = []): PDOStatement
+    {
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($parametros);
+        return $stmt;
+    }
+
+    public function executarPreparado(string $sql, array $parametros = []): bool
+    {
+        try {
+            $stmt = $this->conn->prepare($sql);
+            return $stmt->execute($parametros);
+        } catch (Throwable $erro) {
+            error_log('Falha na operação do banco: ' . $erro->getMessage());
+            return false;
+        }
+    }
+
+    public function registrarLog(?int $admCodigo, string $tabela, string $operacao, $chave = null, string $sql = ''): void
+    {
+        try {
+            $this->executarPreparado(
+                'INSERT INTO log (admCodigo, logDatahora, logTabela, logOperacao, logChave, logSql, logUrl, logIp)
+                 VALUES (:admCodigo, NOW(), :tabela, :operacao, :chave, :sql, :url, :ip)',
+                [
+                    'admCodigo' => $admCodigo ?: null,
+                    'tabela' => $tabela,
+                    'operacao' => $operacao,
+                    'chave' => $chave === null ? null : (string) $chave,
+                    'sql' => $sql,
+                    'url' => (string) ($_SERVER['REQUEST_URI'] ?? ''),
+                    'ip' => (string) ($_SERVER['REMOTE_ADDR'] ?? ''),
+                ]
+            );
+        } catch (Throwable $erro) {
+            error_log('Falha ao registrar log: ' . $erro->getMessage());
+        }
     }
 
     public function escapar($valor): string
