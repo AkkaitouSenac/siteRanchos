@@ -5,7 +5,19 @@ if ($_SERVER['REQUEST_METHOD']==='POST' && !Conexao::validarCsrf($_POST['_csrf']
 if (!$erro && $item==='salvar' && $_SERVER['REQUEST_METHOD']==='POST') {
  $id=(int)($_POST['assCodigo']??0); $dados=['valor'=>(float)($_POST['valor']??0),'dias'=>(int)($_POST['dias']??0),'nome'=>trim((string)($_POST['nome']??''))];
  if($dados['nome']===''||$dados['dias']<1||$dados['valor']<0){$erro='Informe nome, dias e valor válidos.';}
- else { $sql=$id?'UPDATE assinatura SET valor=:valor,dias=:dias,nome=:nome WHERE assCodigo=:id':'INSERT INTO assinatura (valor,dias,nome) VALUES (:valor,:dias,:nome)'; if($id)$dados['id']=$id; $ok=$obj->executarPreparado($sql,$dados); if($ok){$obj->registrarLog((int)$_SESSION['admCodigo'],'assinatura',$id?'UPDATE':'INSERT',$id?:null,$sql);header('Location: assinatura.php?sucesso='.($id?'2':'1'));exit;} $erro='Não foi possível salvar a assinatura.';}
+ else {
+  if ($id) {
+   $sql='UPDATE assinatura SET valor=:valor,dias=:dias,nome=:nome WHERE assCodigo=:id';
+   $dados['id']=$id;
+  } else {
+   $novoCodigo=(int)$obj->consultaPreparada('SELECT COALESCE(MAX(assCodigo),0)+1 FROM assinatura')->fetchColumn();
+   $sql='INSERT INTO assinatura (assCodigo,valor,dias,nome) VALUES (:id,:valor,:dias,:nome)';
+   $dados['id']=$novoCodigo;
+  }
+  $ok=$obj->executarPreparado($sql,$dados);
+  if($ok){$obj->registrarLog((int)$_SESSION['admCodigo'],'assinatura',$id?'UPDATE':'INSERT',$id?:$dados['id'],$sql);header('Location: assinatura.php?sucesso='.($id?'2':'1'));exit;}
+  $erro='Não foi possível salvar a assinatura.';
+ }
 }
 if(!$erro&&$item==='remover'&&$_SERVER['REQUEST_METHOD']==='POST'){ $ids=array_values(array_filter(array_map('intval',(array)($_POST['assCodigo']??[])))); if($ids){$marks=implode(',',array_fill(0,count($ids),'?'));$ok=$obj->executarPreparado("DELETE FROM assinatura WHERE assCodigo IN ($marks)",$ids);if($ok)foreach($ids as $id)$obj->registrarLog((int)$_SESSION['admCodigo'],'assinatura','DELETE',$id);header('Location: assinatura.php?sucesso='.($ok?'3':'4'));exit;}$erro='Selecione ao menos um registro.';}
 $registro=['assCodigo'=>'','valor'=>'','dias'=>'','nome'=>'']; if($item==='adicionar'&&$codigo){$r=$obj->consultaPreparada('SELECT assCodigo,valor,dias,nome FROM assinatura WHERE assCodigo=:id',['id'=>$codigo])->fetch();if($r)$registro=array_merge($registro,$r);} function hs($v):string{return htmlspecialchars((string)$v,ENT_QUOTES,'UTF-8');}
