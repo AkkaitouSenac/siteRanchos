@@ -1,3 +1,18 @@
+<?php
+$ranchos = [];
+try {
+    require_once __DIR__ . '/painel/classe/conexao.php';
+    $conexao = new Conexao();
+    $ranchos = $conexao->consultaPreparada(
+        'SELECT titulo, descricao, valorDiaria, ativo
+         FROM rancho
+         WHERE ativo = 1 AND dataExpiracao >= CURDATE()
+         ORDER BY ranCodigo DESC'
+    )->fetchAll();
+} catch (Throwable $erro) {
+    error_log('Falha ao carregar ranchos em destaque: ' . $erro->getMessage());
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -53,50 +68,24 @@
         </section>
 
         <section class="row g-4 mb-5" id="ranchos">
-            <div class="col-md-6">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                        <h4 class="card-title">Rancho do Bosque</h4>
-                        <p class="card-text">Beira de lago, 3 quartos, cozinha equipada, área externa para churrasco e
-                            acesso fácil à cidade.</p>
-                        <p class="mb-1"><strong>Diária:</strong> R$ 800</p>
-                        <p class="mb-0"><strong>Status:</strong> Anúncio ativo</p>
-                    </div>
+            <?php if (!$ranchos): ?>
+                <div class="col-12">
+                    <div class="alert alert-info">Nenhum rancho ativo disponível no momento.</div>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                        <h4 class="card-title">Rancho dos Amigos</h4>
-                        <p class="card-text">Áreas verdes, acomodação para 12 pessoas, banheiro com água quente e
-                            estacionamento privativo.</p>
-                        <p class="mb-1"><strong>Diária:</strong> R$ 1.050</p>
-                        <p class="mb-0"><strong>Status:</strong> Anúncio ativo</p>
+            <?php else: ?>
+                <?php foreach ($ranchos as $rancho): ?>
+                    <div class="col-md-6">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <h4 class="card-title"><?php echo htmlspecialchars($rancho['titulo'], ENT_QUOTES, 'UTF-8'); ?></h4>
+                                <p class="card-text"><?php echo htmlspecialchars($rancho['descricao'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+                                <p class="mb-1"><strong>Diária:</strong> R$ <?php echo htmlspecialchars($rancho['valorDiaria'], ENT_QUOTES, 'UTF-8'); ?></p>
+                                <p class="mb-0"><strong>Status:</strong> <?php echo (int) $rancho['ativo'] === 1 ? 'Anúncio ativo' : 'Anúncio inativo'; ?></p>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                        <h4 class="card-title">Rancho Vila Verde</h4>
-                        <p class="card-text">Espaço tranquilo com fogão a lenha, rede, piscina exclusiva e suporte para
-                            eventos de fim de semana.</p>
-                        <p class="mb-1"><strong>Diária:</strong> R$ 950</p>
-                        <p class="mb-0"><strong>Status:</strong> Anúncio ativo</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                        <h4 class="card-title">Rancho Recanto Sul</h4>
-                        <p class="card-text">Casa com varanda ampla, rede de descanso, cozinha completa e localização
-                            próxima à rodovia.</p>
-                        <p class="mb-1"><strong>Diária:</strong> R$ 870</p>
-                        <p class="mb-0"><strong>Status:</strong> Anúncio ativo</p>
-                    </div>
-                </div>
-            </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </section>
 
         <section class="card shadow-sm mb-5" id="como-funciona">
