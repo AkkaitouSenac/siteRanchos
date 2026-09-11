@@ -10,17 +10,16 @@ $senha = $_POST['admSenha'] ?? '';
 require_once 'classe/conexao.php';
 
 $conexao = new Conexao();
-$resultado = $conexao->login($email, $senha);
+$administrador = $conexao->login($email, $senha);
 
-$conta = $resultado ? $resultado->num_rows : 0;
-if ($conta == 0) {
+if (!$administrador) {
     session_destroy();
     header("Location: login.php?erro=1");
     exit();
 } else {
-$linha = $resultado->fetch_assoc();
- $_SESSION['admCodigo'] = $linha['admCodigo'];
- $_SESSION['admNome'] = $linha['admNome'];
-header("Location: index.php");
-exit();
+    session_regenerate_id(true);
+    $_SESSION['admCodigo'] = $administrador['admCodigo'];
+    $_SESSION['admNome'] = $administrador['admNome'];
+    header("Location: index.php");
+    exit();
 }

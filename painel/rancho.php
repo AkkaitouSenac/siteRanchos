@@ -70,7 +70,7 @@ $rancho = [
 ];
 if ($item === 'adicionar' && $codigo !== null) {
     $resultado = $obj->consultaAvancada('rancho', '*', 'ranCodigo = ' . (int) $codigo);
-    if ($resultado && ($linha = $resultado->fetch_assoc())) {
+    if ($resultado && ($linha = $resultado->fetch(PDO::FETCH_ASSOC))) {
         $rancho = array_merge($rancho, $linha);
     }
 }
@@ -132,7 +132,7 @@ if ($item === 'adicionar' && $codigo !== null) {
                     <table class="table table-hover">
                         <thead><tr><th></th><th>Código</th><th>Título</th><th>Cidade</th><th>Diária</th><th>Status</th><th></th></tr></thead>
                         <tbody>
-                        <?php $resultado = $obj->consultaAvancada('rancho', $camposLista); if ($resultado): while ($linha = $resultado->fetch_assoc()): ?>
+                        <?php $resultado = $obj->consultaAvancada('rancho', $camposLista); if ($resultado): while ($linha = $resultado->fetch(PDO::FETCH_ASSOC)): ?>
                             <tr>
                                 <td><input type="checkbox" name="ranCodigo[]" value="<?php echo (int) $linha['ranCodigo']; ?>"></td>
                                 <td><?php echo (int) $linha['ranCodigo']; ?></td>

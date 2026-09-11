@@ -86,15 +86,15 @@ $item = $_GET['item'] ?? 'listar';
                                 $table = "adm";
                                 $colunas = 'admCodigo, admNome, admEmail';
                                 $resultado = $obj->consultaAvancada($table, $colunas);
-                                while ($linha = $resultado->fetch_assoc()) {
+                                while ($linha = $resultado->fetch(PDO::FETCH_ASSOC)) {
                                 ?>
-                                    <tr title="Administrador: <?php echo $linha['admNome'] ?>">
-                                        <th scope="row"><input type="checkbox" value="<?php echo $linha['admCodigo'] ?>" name="admCodigo[]"></th>
-                                        <td><?php echo $linha['admCodigo'] ?></td>
-                                        <td><?php echo $linha['admNome'] ?></td>
-                                        <td><?php echo $linha['admEmail'] ?></td>
+                                    <tr title="Administrador: <?php echo htmlspecialchars($linha['admNome'], ENT_QUOTES, 'UTF-8'); ?>">
+                                        <th scope="row"><input type="checkbox" value="<?php echo (int) $linha['admCodigo']; ?>" name="admCodigo[]"></th>
+                                        <td><?php echo (int) $linha['admCodigo']; ?></td>
+                                        <td><?php echo htmlspecialchars($linha['admNome'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                        <td><?php echo htmlspecialchars($linha['admEmail'], ENT_QUOTES, 'UTF-8'); ?></td>
                                         <td>
-                                            <a href="<?php echo $arquivoAtual; ?>?item=adicionar&codigo=<?php echo $linha['admCodigo'] ?>">
+                                            <a href="<?php echo htmlspecialchars($arquivoAtual, ENT_QUOTES, 'UTF-8'); ?>?item=adicionar&codigo=<?php echo (int) $linha['admCodigo']; ?>">
                                                 <i class="bi bi-pencil-fill" title="Editar"></i>
                                             </a>
                                         </td>
@@ -114,7 +114,7 @@ $item = $_GET['item'] ?? 'listar';
                         if (isset($_GET['codigo'])) {
                             $codigo = $obj->escapar($_GET['codigo']);
                             $resultado = $obj->consultaAvancada($table, $colunas, "$chavePrimaria = '$codigo'");
-                            if ($linha = $resultado->fetch_assoc()) {
+                            if ($linha = $resultado->fetch(PDO::FETCH_ASSOC)) {
                                 $admEmail = $linha['admEmail'];
                                 $admSenha = $linha['admSenha'];
                                 $admNome = $linha['admNome'];
@@ -129,7 +129,7 @@ $item = $_GET['item'] ?? 'listar';
                             <input type="hidden" name="<?php echo $chavePrimaria; ?>" value="<?php echo isset($codigo) ? $codigo : ''; ?>">
                             <div class="col-md-6">
                                 <label for="inputEmail4" class="form-label">Email</label>
-                                <input value="<?php echo $admEmail; ?>" type="email" class="form-control" name="admEmail" id="inputEmail4">
+                                <input value="<?php echo htmlspecialchars($admEmail, ENT_QUOTES, 'UTF-8'); ?>" type="email" class="form-control" name="admEmail" id="inputEmail4">
                             </div>
                             <div class="col-md-6">
                                 <label for="inputPassword4" class="form-label">Senha</label>
@@ -137,7 +137,7 @@ $item = $_GET['item'] ?? 'listar';
                             </div>
                             <div class="col-12">
                                 <label for="nome" class="form-label">Nome</label>
-                                <input value="<?php echo $admNome; ?>" type="text" name="admNome" class="form-control" id="nome" placeholder="Seu Nome">
+                                <input value="<?php echo htmlspecialchars($admNome, ENT_QUOTES, 'UTF-8'); ?>" type="text" name="admNome" class="form-control" id="nome" placeholder="Seu Nome">
                             </div>
                             <div class="col-12">
                                 <button type="submit" class="btn btn-primary">Cadastrar</button>
@@ -199,10 +199,10 @@ $item = $_GET['item'] ?? 'listar';
                         <tbody>
                             <?php
                         $_SESSION['CodigoParaRemover'] = $codigosChave;
-                    while ($linha = $resposta->fetch_assoc()) { ?>
+                    while ($linha = $resposta->fetch(PDO::FETCH_ASSOC)) { ?>
                             <tr>
-                                <td><?php echo $linha['admCodigo'] ?></td>
-                                <td><?php echo $linha['admNome'] ?></td>
+                                <td><?php echo (int) $linha['admCodigo']; ?></td>
+                                <td><?php echo htmlspecialchars($linha['admNome'], ENT_QUOTES, 'UTF-8'); ?></td>
                             </tr>
                             <?php
                         } ?>
