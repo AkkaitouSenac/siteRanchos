@@ -60,6 +60,10 @@ const renderImageOrderPreview = () => {
     imagensOrdenadas.forEach((imagem, indice) => {
         const item = document.createElement('div');
         item.className = 'image-order-item';
+        item.style.width = '7rem';
+        item.style.height = '7rem';
+        item.style.flex = '0 0 7rem';
+        item.style.overflow = 'hidden';
         item.draggable = true;
         item.dataset.index = String(indice);
         item.addEventListener('dragstart', (event) => {
@@ -79,6 +83,12 @@ const renderImageOrderPreview = () => {
         const image = document.createElement('img');
         image.src = imagem.src;
         image.alt = `Imagem ${indice + 1}`;
+        image.style.display = 'block';
+        image.style.width = '100%';
+        image.style.height = '5rem';
+        image.style.maxWidth = '100%';
+        image.style.maxHeight = '5rem';
+        image.style.objectFit = 'cover';
         const label = document.createElement('small');
         label.textContent = `Imagem ${indice + 1}`;
         item.append(image, label);
