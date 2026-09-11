@@ -37,8 +37,18 @@
         authArea.appendChild(chip);
     };
 
-    fetch('api/proprietario.php?acao=sessao', { headers: { Accept: 'application/json' } })
-        .then((resposta) => resposta.ok ? resposta.json() : null)
-        .then((dados) => render(dados && dados.proprietario ? dados.proprietario : null))
-        .catch(() => render(null));
+    fetch(new URL('api/proprietario.php?acao=sessao', document.baseURI), {
+        credentials: 'same-origin',
+        headers: { Accept: 'application/json' }
+    })
+        .then((resposta) => {
+            if (!resposta.ok) {
+                throw new Error('Não foi possível consultar a sessão.');
+            }
+            return resposta.json();
+        })
+        .then((dados) => render(dados.proprietario || null))
+        .catch(() => {
+            // Falhas de rede não encerram nem apagam visualmente a sessão atual.
+        });
 })();
