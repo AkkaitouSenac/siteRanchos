@@ -49,7 +49,7 @@ try {
                             <li class="nav-item"><a class="nav-link text-white" href="contato.html">Contato</a>
                             </li>
                         </ul>
-                        <a href="anuncios.html?login=1" class="btn btn-login-top">Entrar</a>
+                        <div id="authArea"></div>
                     </div>
                 </div>
             </nav>
@@ -110,6 +110,7 @@ try {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"
         referrerpolicy="no-referrer"></script>
+    <script src="session-header.js"></script>
 </body>
 
 </html>

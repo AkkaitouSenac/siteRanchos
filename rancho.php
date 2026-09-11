@@ -45,7 +45,10 @@ function h($valor): string
 <body>
     <header class="bg-primary text-white py-4">
         <div class="container">
-            <a class="navbar-brand text-white fw-bold" href="index.php">Ranchos Araçatuba & Região</a>
+            <div class="d-flex align-items-center w-100">
+                <a class="navbar-brand text-white fw-bold me-auto" href="index.php">Ranchos Araçatuba & Região</a>
+                <div id="authArea"></div>
+            </div>
         </div>
     </header>
     <main class="container py-5">
@@ -77,5 +80,6 @@ function h($valor): string
             </article>
         <?php endif; ?>
     </main>
+    <script src="session-header.js"></script>
 </body>
 </html>

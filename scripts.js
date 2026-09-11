@@ -263,7 +263,14 @@ const restaurarSessao = async () => {
         });
         if (!resposta.ok) return;
         const dados = await resposta.json();
-        if (dados.proprietario) setActiveOwner(dados.proprietario);
+        if (dados.proprietario) {
+            setActiveOwner(dados.proprietario);
+        } else {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('login') === '1' && authModal) authModal.show();
+        }
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('area') === '1' && activeOwner) irParaPainel();
     } catch (erro) {
         console.error('Não foi possível restaurar a sessão do proprietário.', erro);
     }
@@ -494,6 +501,6 @@ carregarDadosPublicos();
 restaurarSessao();
 
 const params = new URLSearchParams(window.location.search);
-if (params.get('login') === '1' && authModal) {
-    authModal.show();
+if (params.get('area') === '1' && activeOwner) {
+    irParaPainel();
 }
