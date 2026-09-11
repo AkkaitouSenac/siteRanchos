@@ -57,3 +57,10 @@ Tabelas previstas:
 - `imagensrancho`
 - `visitas`
 - `log`
+
+-------------------------------------------------------------------------------------------------------------------
+corrigir toda vez q da f5 na area do dono logado ele sai do login
+Tirar o status do anuncio de locais comums e deixar apenas para o adm ver no painel e para o proprio dono ver na minha area de dono
+Rancho do cafe criado aparece no destaque mas nao aparece em anuncios nem sem filtro
+criar todas as assinaturas
+criar a abertura dos anuncios e suas paginas
