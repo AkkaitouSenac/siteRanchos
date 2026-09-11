@@ -44,6 +44,7 @@ const listingPrice = document.getElementById('listingPrice');
 const listingCapacity = document.getElementById('listingCapacity');
 const listingContato = document.getElementById('listingContato');
 const listingImagem = document.getElementById('listingImagem');
+let anuncioEmEdicao = null;
 
 let authModal, listingModal;
 if (window.bootstrap) {
@@ -394,10 +395,40 @@ const createOwnerListingCard = (item) => {
     criado.className = 'small text-muted mb-0';
     criado.textContent = `Criado em ${formatarData(item.dataCriacao)} · Expira em ${formatarData(item.dataExpiracao)}`;
 
-    body.append(title, location, badges, criado);
+    const editar = document.createElement('button');
+    editar.type = 'button';
+    editar.className = 'btn btn-outline-primary btn-sm me-2';
+    editar.textContent = 'Editar anúncio';
+    editar.addEventListener('click', () => abrirEdicao(item));
+
+    const destaque = document.createElement('button');
+    destaque.type = 'button';
+    destaque.className = 'btn btn-outline-warning btn-sm';
+    destaque.textContent = 'Destacar por R$ 20,00 / 7 dias';
+    destaque.addEventListener('click', () => {
+        window.alert('A taxa de destaque custa R$ 20,00 por 7 dias. O pagamento ainda não está integrado.');
+    });
+
+    body.append(title, location, badges, criado, editar, destaque);
     card.appendChild(body);
     col.appendChild(card);
     return col;
+};
+
+const abrirEdicao = (item) => {
+    anuncioEmEdicao = item;
+    listingForm.reset();
+    document.getElementById('listingModalLabel').textContent = 'Editar anúncio';
+    listingName.value = item.titulo;
+    listingDescription.value = item.descricao;
+    listingLocation.value = item.cidade;
+    listingPrice.value = item.valorDiaria;
+    listingCapacity.value = item.capacidadePessoas;
+    listingContato.value = item.contato;
+    planOptions.closest('.col-12').classList.add('d-none');
+    listingImagem.closest('.col-12').classList.add('d-none');
+    listingStatus.textContent = '';
+    listingModal.show();
 };
 
 const renderPainel = () => {
@@ -451,8 +482,12 @@ const renderPlanOptions = () => {
 };
 
 btnNovoAnuncio.addEventListener('click', () => {
+    anuncioEmEdicao = null;
+    document.getElementById('listingModalLabel').textContent = 'Publicar novo anúncio';
     listingStatus.textContent = '';
     listingForm.reset();
+    planOptions.closest('.col-12').classList.remove('d-none');
+    listingImagem.closest('.col-12').classList.remove('d-none');
     renderPlanOptions();
 });
 
@@ -462,6 +497,31 @@ listingForm.addEventListener('submit', async (event) => {
     if (!activeOwner) {
         listingStatus.textContent = 'Você precisa estar logado como proprietário para publicar um anúncio.';
         listingStatus.className = 'mt-3 text-danger';
+        return;
+    }
+
+    if (anuncioEmEdicao) {
+        const dados = new URLSearchParams({
+            ranCodigo: String(anuncioEmEdicao.ranCodigo),
+            titulo: listingName.value.trim(),
+            descricao: listingDescription.value.trim(),
+            cidade: listingLocation.value,
+            valorDiaria: listingPrice.value,
+            contato: listingContato.value.trim(),
+            capacidade: listingCapacity.value,
+        });
+        try {
+            const resposta = await fetch('api/editar-rancho.php', { method: 'POST', body: dados });
+            const resultado = await resposta.json();
+            if (!resposta.ok) throw new Error(resultado.erro);
+            listingStatus.textContent = 'Anúncio atualizado com sucesso.';
+            listingStatus.className = 'mt-3 text-success';
+            listingModal.hide();
+            await carregarDadosPublicos();
+        } catch (erro) {
+            listingStatus.textContent = erro.message || 'Não foi possível editar o anúncio.';
+            listingStatus.className = 'mt-3 text-danger';
+        }
         return;
     }
 

@@ -1,4 +1,5 @@
 <?php
+session_start();
 header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../painel/classe/conexao.php';
@@ -12,9 +13,10 @@ try {
                 (SELECT i.imagem FROM imagensrancho i
                  WHERE i.ranCodigo = r.ranCodigo ORDER BY i.imgCodigo DESC LIMIT 1) AS imagem
          FROM rancho r
-         WHERE r.ativo = 1 AND r.dataExpiracao >= CURDATE()
+         WHERE (r.ativo = 1 AND r.dataExpiracao >= CURDATE())
+            OR r.proCodigo = :proCodigo
          ORDER BY r.ranCodigo DESC'
-    )->fetchAll();
+    , ['proCodigo' => (int) ($_SESSION['proCodigo'] ?? 0)])->fetchAll();
 
     $assinaturas = $conexao->consultaPreparada(
         'SELECT assCodigo, nome, dias, valor
