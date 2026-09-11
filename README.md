@@ -32,12 +32,13 @@ O painel exige um administrador cadastrado na tabela `adm`. Depois de abrir a te
 - Cabeçalho padronizado nas páginas públicas.
 - Anúncios públicos carregados do banco de dados, considerando somente ranchos ativos e dentro da validade.
 - API pública em `api/anuncios.php` para carregar ranchos e assinaturas do banco.
+- Login e cadastro de proprietários pelo frontend integrados à tabela `proprietario`.
+- Publicação pública de ranchos integrada à tabela `rancho`.
+- Upload opcional de imagens JPG, PNG ou WEBP em `uploads/ranchos`, com caminho registrado em `imagensrancho`.
 
 ### Ainda não implementado
 
-- Login e publicação de anúncios pelo frontend público ainda precisam ser integrados ao banco.
 - Envio ou gravação do formulário de contato.
-- Upload de imagens dos ranchos.
 - Envio ou gravação do formulário de contato.
 - Registro de todas as operações restantes no sistema de logs.
 

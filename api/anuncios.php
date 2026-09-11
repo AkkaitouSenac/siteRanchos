@@ -6,12 +6,14 @@ require_once __DIR__ . '/../painel/classe/conexao.php';
 try {
     $conexao = new Conexao();
     $ranchos = $conexao->consultaPreparada(
-        'SELECT ranCodigo, proCodigo, assCodigo, titulo, descricao, cidade,
+        'SELECT r.ranCodigo, r.proCodigo, r.assCodigo, r.titulo, r.descricao, r.cidade,
                 valorDiaria, contato, capacidadePessoas, endereco, qtdQuartos,
-                dataExpiracao, ativo
-         FROM rancho
-         WHERE ativo = 1 AND dataExpiracao >= CURDATE()
-         ORDER BY ranCodigo DESC'
+                dataExpiracao, ativo,
+                (SELECT i.imagem FROM imagensrancho i
+                 WHERE i.ranCodigo = r.ranCodigo ORDER BY i.imgCodigo DESC LIMIT 1) AS imagem
+         FROM rancho r
+         WHERE r.ativo = 1 AND r.dataExpiracao >= CURDATE()
+         ORDER BY r.ranCodigo DESC'
     )->fetchAll();
 
     $assinaturas = $conexao->consultaPreparada(

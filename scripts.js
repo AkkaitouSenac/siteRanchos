@@ -1,13 +1,7 @@
 let assinaturas = [];
 
-const owners = [
-    { proCodigo: 1, nome: 'Carlos Mendes', email: 'carlos@exemplo.com', telefone: '(18) 99999-1111', senha: '1234' },
-    { proCodigo: 2, nome: 'Fernanda Silva', email: 'fernanda@exemplo.com', telefone: '(18) 99999-2222', senha: '1234' }
-];
-
 let ranchos = [];
 let nextRanCodigo = 1;
-let nextProCodigo = owners.length + 1;
 let activeOwner = null;
 
 const somarDias = (data, dias) => {
@@ -48,6 +42,7 @@ const listingLocation = document.getElementById('listingLocation');
 const listingPrice = document.getElementById('listingPrice');
 const listingCapacity = document.getElementById('listingCapacity');
 const listingContato = document.getElementById('listingContato');
+const listingImagem = document.getElementById('listingImagem');
 
 let authModal, listingModal;
 if (window.bootstrap) {
@@ -64,6 +59,14 @@ const createListingCard = (item) => {
 
     const body = document.createElement('div');
     body.className = 'card-body';
+
+    if (item.imagem) {
+        const image = document.createElement('img');
+        image.className = 'card-img-top';
+        image.src = item.imagem;
+        image.alt = `Imagem de ${item.titulo}`;
+        card.appendChild(image);
+    }
 
     const title = document.createElement('h4');
     title.className = 'card-title';
@@ -143,8 +146,6 @@ clearFilters.addEventListener('click', () => {
     priceValue.textContent = `R$ ${priceRange.value}`;
     updateFilters();
 });
-
-const findOwnerByEmail = (email) => owners.find(o => o.email.toLowerCase() === email.toLowerCase());
 
 const carregarDadosPublicos = async () => {
     try {
@@ -238,32 +239,39 @@ const setActiveOwner = (owner) => {
 };
 
 const fazerLogout = () => {
-    activeOwner = null;
-    renderAuthArea();
-    painelTabItem.classList.add('d-none');
-    if (window.bootstrap) {
-        bootstrap.Tab.getOrCreateInstance(document.getElementById('browse-tab')).show();
-    }
+    fetch('api/proprietario.php?acao=sair', { method: 'POST' })
+        .finally(() => {
+            activeOwner = null;
+            renderAuthArea();
+            painelTabItem.classList.add('d-none');
+            if (window.bootstrap) {
+                bootstrap.Tab.getOrCreateInstance(document.getElementById('browse-tab')).show();
+            }
+        });
 };
 
-loginForm.addEventListener('submit', (event) => {
+loginForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const email = document.getElementById('loginEmail').value.trim();
     const senha = document.getElementById('loginSenha').value;
-    const owner = findOwnerByEmail(email);
-
-    if (!owner || owner.senha !== senha) {
-        loginFeedback.textContent = 'Email ou senha inválidos.';
-        return;
+    try {
+        const resposta = await fetch('api/proprietario.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ acao: 'login', email, senha })
+        });
+        const dados = await resposta.json();
+        if (!resposta.ok) throw new Error(dados.erro);
+        loginFeedback.textContent = '';
+        loginForm.reset();
+        if (authModal) authModal.hide();
+        setActiveOwner(dados.proprietario);
+    } catch (erro) {
+        loginFeedback.textContent = erro.message || 'Não foi possível entrar.';
     }
-
-    loginFeedback.textContent = '';
-    loginForm.reset();
-    if (authModal) authModal.hide();
-    setActiveOwner(owner);
 });
 
-registerForm.addEventListener('submit', (event) => {
+registerForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const nome = document.getElementById('regNome').value.trim();
     const email = document.getElementById('regEmail').value.trim();
@@ -275,18 +283,21 @@ registerForm.addEventListener('submit', (event) => {
         registerFeedback.textContent = 'As senhas não coincidem.';
         return;
     }
-    if (findOwnerByEmail(email)) {
-        registerFeedback.textContent = 'Este email já está cadastrado. Faça login.';
-        return;
+    try {
+        const resposta = await fetch('api/proprietario.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ acao: 'cadastrar', nome, email, telefone, senha })
+        });
+        const dados = await resposta.json();
+        if (!resposta.ok) throw new Error(dados.erro);
+        registerFeedback.textContent = '';
+        registerForm.reset();
+        if (authModal) authModal.hide();
+        setActiveOwner(dados.proprietario);
+    } catch (erro) {
+        registerFeedback.textContent = erro.message || 'Não foi possível criar a conta.';
     }
-
-    const newOwner = { proCodigo: nextProCodigo++, nome, email, telefone, senha };
-    owners.push(newOwner);
-
-    registerFeedback.textContent = '';
-    registerForm.reset();
-    if (authModal) authModal.hide();
-    setActiveOwner(newOwner);
 });
 
 const formatarData = (data) => data.toLocaleDateString('pt-BR');
@@ -408,7 +419,7 @@ btnNovoAnuncio.addEventListener('click', () => {
     renderPlanOptions();
 });
 
-listingForm.addEventListener('submit', (event) => {
+listingForm.addEventListener('submit', async (event) => {
     event.preventDefault();
 
     if (!activeOwner) {
@@ -426,30 +437,36 @@ listingForm.addEventListener('submit', (event) => {
         return;
     }
 
-    const agora = new Date();
-    const newListing = {
-        ranCodigo: nextRanCodigo++,
-        proCodigo: activeOwner.proCodigo,
-        titulo: listingName.value.trim(),
-        descricao: listingDescription.value.trim(),
-        cidade: listingLocation.value,
-        valorDiaria: Number(listingPrice.value),
-        contato: listingContato.value.trim(),
-        capacidadePessoas: Number(listingCapacity.value),
-        endereco: '',
-        qtdQuartos: null,
-        assCodigo: plano.assCodigo,
-        dataCriacao: agora,
-        dataExpiracao: somarDias(agora, plano.dias),
-        ativo: true
-    };
+    const dados = new FormData();
+    dados.append('titulo', listingName.value.trim());
+    dados.append('descricao', listingDescription.value.trim());
+    dados.append('cidade', listingLocation.value);
+    dados.append('valorDiaria', listingPrice.value);
+    dados.append('contato', listingContato.value.trim());
+    dados.append('capacidade', listingCapacity.value);
+    dados.append('assCodigo', String(plano.assCodigo));
+    if (listingImagem.files[0]) {
+        dados.append('imagem', listingImagem.files[0]);
+    }
 
-    ranchos.unshift(newListing);
+    try {
+        const resposta = await fetch('api/publicar-rancho.php', {
+            method: 'POST',
+            body: dados
+        });
+        const resultado = await resposta.json();
+        if (!resposta.ok) throw new Error(resultado.erro);
 
-    listingForm.reset();
-    if (listingModal) listingModal.hide();
-    renderPainel();
-    updateFilters();
+        listingStatus.textContent = 'Anúncio publicado com sucesso.';
+        listingStatus.className = 'mt-3 text-success';
+        listingForm.reset();
+        if (listingModal) listingModal.hide();
+        await carregarDadosPublicos();
+        renderPainel();
+    } catch (erro) {
+        listingStatus.textContent = erro.message || 'Não foi possível publicar o anúncio.';
+        listingStatus.className = 'mt-3 text-danger';
+    }
 });
 
 renderAuthArea();
