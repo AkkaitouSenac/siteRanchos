@@ -15,6 +15,27 @@ try {
     $conexao = new Conexao();
     $acao = $_POST['acao'] ?? $_GET['acao'] ?? '';
 
+    if ($acao === 'sessao') {
+        if (empty($_SESSION['proCodigo'])) {
+            respostaJson(['proprietario' => null]);
+        }
+        $proprietario = $conexao->consultaPreparada(
+            'SELECT proCodigo, nome, email, telefone
+             FROM proprietario WHERE proCodigo = :codigo LIMIT 1',
+            ['codigo' => (int) $_SESSION['proCodigo']]
+        )->fetch();
+        if (!$proprietario) {
+            unset($_SESSION['proCodigo']);
+            respostaJson(['proprietario' => null]);
+        }
+        respostaJson(['proprietario' => [
+            'proCodigo' => (int) $proprietario['proCodigo'],
+            'nome' => $proprietario['nome'],
+            'email' => $proprietario['email'],
+            'telefone' => $proprietario['telefone'],
+        ]]);
+    }
+
     if ($acao === 'login') {
         $stmt = $conexao->consultaPreparada(
             'SELECT proCodigo, nome, email, telefone, senha
