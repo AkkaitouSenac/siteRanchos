@@ -25,7 +25,6 @@ O painel exige um administrador cadastrado na tabela `adm`.
 ### Área pública
 
 - Listagem de ranchos ativos e dentro do prazo de validade.
-- Seção de ranchos em destaque no topo da página.
 - Busca e filtros por cidade, capacidade e valor.
 - Página individual do rancho em `rancho.php`.
 - Galeria de imagens e botão de contato por WhatsApp.
@@ -52,8 +51,6 @@ O painel exige um administrador cadastrado na tabela `adm`.
 - Consulta de logs do sistema.
 
 Os planos de assinatura são criados manualmente pelo painel. O formulário público apenas lista planos cadastrados na tabela `assinatura`; nenhum plano é criado automaticamente pela API.
-
-O botão de destaque informa o valor de R$ 20,00 por 7 dias. Atualmente ele é apenas informativo e não registra pagamento nem cobrança automática.
 
 ## APIs
 
@@ -163,6 +160,5 @@ http://localhost/projeto/rancho.php?codigo=1
 ## Pendências conhecidas
 
 - O formulário de contato ainda não grava ou envia mensagens.
-- O destaque ainda não possui integração de pagamento.
 - O registro de logs pode ser ampliado para todas as operações.
 - A geração manual de códigos deve ser substituída por chaves `AUTO_INCREMENT` ou protegida por transação no banco em uma futura migração.

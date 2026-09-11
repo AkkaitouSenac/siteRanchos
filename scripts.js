@@ -11,7 +11,6 @@ const somarDias = (data, dias) => {
 };
 
 const listings = document.getElementById('listings');
-const featuredListings = document.getElementById('featuredListings');
 const searchText = document.getElementById('searchText');
 const locationSelect = document.getElementById('locationSelect');
 const priceRange = document.getElementById('priceRange');
@@ -164,15 +163,6 @@ const renderListings = (items) => {
     items.forEach(item => listings.appendChild(createListingCard(item)));
 };
 
-const renderFeaturedListings = () => {
-    if (!featuredListings) return;
-    featuredListings.textContent = '';
-    ranchos
-        .filter((rancho) => rancho.ativo && rancho.dataExpiracao > new Date())
-        .slice(0, 3)
-        .forEach((rancho) => featuredListings.appendChild(createListingCard(rancho)));
-};
-
 const updateFilters = () => {
     const search = searchText.value.toLowerCase();
     const location = locationSelect.value;
@@ -205,7 +195,6 @@ const updateFilters = () => {
 filterForm.addEventListener('submit', (event) => {
     event.preventDefault();
     updateFilters();
-    renderFeaturedListings();
 });
 priceRange.addEventListener('input', () => {
     priceValue.textContent = `R$ ${priceRange.value}`;
@@ -459,15 +448,7 @@ const createOwnerListingCard = (item) => {
     editar.textContent = 'Editar anúncio';
     editar.addEventListener('click', () => abrirEdicao(item));
 
-    const destaque = document.createElement('button');
-    destaque.type = 'button';
-    destaque.className = 'btn btn-outline-warning btn-sm';
-    destaque.textContent = 'Destacar por R$ 20,00 / 7 dias';
-    destaque.addEventListener('click', () => {
-        window.alert('A taxa de destaque custa R$ 20,00 por 7 dias. O pagamento ainda não está integrado.');
-    });
-
-    body.append(title, location, badges, criado, editar, destaque);
+    body.append(title, location, badges, criado, editar);
     card.appendChild(body);
     col.appendChild(card);
     return col;
