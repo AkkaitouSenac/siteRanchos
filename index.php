@@ -34,8 +34,8 @@
                             <li class="nav-item"><a class="nav-link text-white" href="contato.html">Contato</a>
                             </li>
                         </ul>
+                        <a href="anuncios.html?login=1" class="btn btn-login-top">Entrar</a>
                     </div>
-                    <a href="anuncios.html?login=1" class="btn btn-login-top">Entrar</a>
                 </div>
             </nav>
         </div>
