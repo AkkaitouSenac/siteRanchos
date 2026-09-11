@@ -44,13 +44,56 @@ const listingPrice = document.getElementById('listingPrice');
 const listingCapacity = document.getElementById('listingCapacity');
 const listingContato = document.getElementById('listingContato');
 const listingImagem = document.getElementById('listingImagem');
+const imageOrderPreview = document.getElementById('imageOrderPreview');
 let anuncioEmEdicao = null;
+let imagensOrdenadas = [];
 
 let authModal, listingModal;
 if (window.bootstrap) {
     authModal = bootstrap.Modal.getOrCreateInstance(authModalEl);
     listingModal = bootstrap.Modal.getOrCreateInstance(listingModalEl);
 }
+
+const renderImageOrderPreview = () => {
+    if (!imageOrderPreview) return;
+    imageOrderPreview.textContent = '';
+    imagensOrdenadas.forEach((imagem, indice) => {
+        const item = document.createElement('div');
+        item.className = 'image-order-item';
+        item.draggable = true;
+        item.dataset.index = String(indice);
+        item.addEventListener('dragstart', (event) => {
+            event.dataTransfer.setData('text/plain', String(indice));
+        });
+        item.addEventListener('dragover', (event) => event.preventDefault());
+        item.addEventListener('drop', (event) => {
+            event.preventDefault();
+            const origem = Number(event.dataTransfer.getData('text/plain'));
+            const destino = Number(item.dataset.index);
+            if (origem === destino || Number.isNaN(origem) || Number.isNaN(destino)) return;
+            const [movida] = imagensOrdenadas.splice(origem, 1);
+            imagensOrdenadas.splice(destino, 0, movida);
+            renderImageOrderPreview();
+        });
+
+        const image = document.createElement('img');
+        image.src = imagem.src;
+        image.alt = `Imagem ${indice + 1}`;
+        const label = document.createElement('small');
+        label.textContent = `Imagem ${indice + 1}`;
+        item.append(image, label);
+        imageOrderPreview.appendChild(item);
+    });
+};
+
+listingImagem.addEventListener('change', () => {
+    imagensOrdenadas = Array.from(listingImagem.files).map((arquivo) => ({
+        id: null,
+        file: arquivo,
+        src: URL.createObjectURL(arquivo)
+    }));
+    renderImageOrderPreview();
+});
 
 const createListingCard = (item) => {
     const col = document.createElement('div');
@@ -181,6 +224,10 @@ const carregarDadosPublicos = async () => {
             valorDiaria: Number(rancho.valorDiaria),
             capacidadePessoas: Number(rancho.capacidadePessoas),
             ativo: Number(rancho.ativo) === 1,
+            imagens: Array.isArray(rancho.imagens) ? rancho.imagens.map((imagem) => ({
+                imgCodigo: Number(imagem.imgCodigo),
+                imagem: imagem.imagem
+            })) : [],
             dataCriacao: new Date(String(rancho.dataCriacao).replace(' ', 'T')),
             dataExpiracao: new Date(String(rancho.dataExpiracao).replace(' ', 'T'))
         })) : [];
@@ -427,7 +474,12 @@ const abrirEdicao = (item) => {
     listingCapacity.value = item.capacidadePessoas;
     listingContato.value = item.contato;
     planOptions.closest('.col-12').classList.add('d-none');
-    listingImagem.closest('.col-12').classList.add('d-none');
+    imagensOrdenadas = (item.imagens || []).map((imagem) => ({
+        id: Number(imagem.imgCodigo),
+        src: imagem.imagem
+    }));
+    renderImageOrderPreview();
+    listingImagem.closest('.col-12').classList.remove('d-none');
     listingStatus.textContent = '';
     listingModal.show();
 };
@@ -487,6 +539,8 @@ btnNovoAnuncio.addEventListener('click', () => {
     document.getElementById('listingModalLabel').textContent = 'Publicar novo anúncio';
     listingStatus.textContent = '';
     listingForm.reset();
+    imagensOrdenadas = [];
+    renderImageOrderPreview();
     planOptions.closest('.col-12').classList.remove('d-none');
     listingImagem.closest('.col-12').classList.remove('d-none');
     renderPlanOptions();
@@ -502,15 +556,16 @@ listingForm.addEventListener('submit', async (event) => {
     }
 
     if (anuncioEmEdicao) {
-        const dados = new URLSearchParams({
-            ranCodigo: String(anuncioEmEdicao.ranCodigo),
-            titulo: listingName.value.trim(),
-            descricao: listingDescription.value.trim(),
-            cidade: listingLocation.value,
-            valorDiaria: listingPrice.value,
-            contato: listingContato.value.trim(),
-            capacidade: listingCapacity.value,
-        });
+        const dados = new FormData();
+        dados.append('ranCodigo', String(anuncioEmEdicao.ranCodigo));
+        dados.append('titulo', listingName.value.trim());
+        dados.append('descricao', listingDescription.value.trim());
+        dados.append('cidade', listingLocation.value);
+        dados.append('valorDiaria', listingPrice.value);
+        dados.append('contato', listingContato.value.trim());
+        dados.append('capacidade', listingCapacity.value);
+        imagensOrdenadas.filter((imagem) => imagem.id !== null)
+            .forEach((imagem) => dados.append('ordemImagens[]', String(imagem.id)));
         try {
             const resposta = await fetch('api/editar-rancho.php', { method: 'POST', body: dados });
             const resultado = await resposta.json();
@@ -543,8 +598,8 @@ listingForm.addEventListener('submit', async (event) => {
     dados.append('contato', listingContato.value.trim());
     dados.append('capacidade', listingCapacity.value);
     dados.append('assCodigo', String(plano.assCodigo));
-    Array.from(listingImagem.files).forEach((arquivo) => {
-        dados.append('imagem[]', arquivo);
+    imagensOrdenadas.forEach((imagem) => {
+        if (imagem.file) dados.append('imagem[]', imagem.file);
     });
 
     try {

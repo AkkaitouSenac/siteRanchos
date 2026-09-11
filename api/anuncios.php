@@ -11,12 +11,21 @@ try {
                 valorDiaria, contato, capacidadePessoas, dataCriacao,
                 dataExpiracao, ativo,
                 (SELECT i.imagem FROM imagensrancho i
-                 WHERE i.ranCodigo = r.ranCodigo ORDER BY i.imgCodigo DESC LIMIT 1) AS imagem
+                 WHERE i.ranCodigo = r.ranCodigo ORDER BY i.imgCodigo LIMIT 1) AS imagem
          FROM rancho r
          WHERE (r.ativo = 1 AND r.dataExpiracao >= CURDATE())
             OR r.proCodigo = :proCodigo
          ORDER BY r.ranCodigo DESC'
     , ['proCodigo' => (int) ($_SESSION['proCodigo'] ?? 0)])->fetchAll();
+
+    foreach ($ranchos as &$rancho) {
+        $rancho['imagens'] = $conexao->consultaPreparada(
+            'SELECT imgCodigo, imagem FROM imagensrancho
+             WHERE ranCodigo = :ranCodigo ORDER BY imgCodigo',
+            ['ranCodigo' => (int) $rancho['ranCodigo']]
+        )->fetchAll();
+    }
+    unset($rancho);
 
     $assinaturas = $conexao->consultaPreparada(
         'SELECT assCodigo, nome, dias, valor
