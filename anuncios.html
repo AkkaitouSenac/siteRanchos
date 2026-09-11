@@ -86,10 +86,10 @@
                                 <div class="mb-3">
                                     <label for="priceRange" class="form-label">Preço máximo por diária (R$)</label>
                                     <input type="range" id="priceRange" class="form-range" min="500" max="2000"
-                                        step="50" value="1500">
+                                        step="50" value="2000">
                                     <div class="d-flex justify-content-between">
                                         <small>R$ 500</small>
-                                        <small id="priceValue">R$ 1500</small>
+                                        <small id="priceValue">R$ 2000</small>
                                     </div>
                                 </div>
                                 <div class="mb-3">
@@ -101,7 +101,12 @@
                                         <option value="12">Até 12 pessoas</option>
                                     </select>
                                 </div>
-                                <button type="submit" class="btn btn-primary w-100">Aplicar filtros</button>
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary">Aplicar filtros</button>
+                                    <button type="button" class="btn btn-outline-secondary" id="clear-filters">
+                                        Remover filtros
+                                    </button>
+                                </div>
                             </form>
                         </div>
                     </div>

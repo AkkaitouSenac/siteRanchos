@@ -102,6 +102,7 @@ const priceRange = document.getElementById('priceRange');
 const priceValue = document.getElementById('priceValue');
 const capacitySelect = document.getElementById('capacitySelect');
 const filterForm = document.getElementById('filter-form');
+const clearFilters = document.getElementById('clear-filters');
 
 const authArea = document.getElementById('authArea');
 const authModalEl = document.getElementById('authModal');
@@ -213,11 +214,12 @@ filterForm.addEventListener('submit', (event) => {
 });
 priceRange.addEventListener('input', () => {
     priceValue.textContent = `R$ ${priceRange.value}`;
+});
+clearFilters.addEventListener('click', () => {
+    filterForm.reset();
+    priceValue.textContent = `R$ ${priceRange.value}`;
     updateFilters();
 });
-searchText.addEventListener('input', updateFilters);
-locationSelect.addEventListener('change', updateFilters);
-capacitySelect.addEventListener('change', updateFilters);
 
 const findOwnerByEmail = (email) => owners.find(o => o.email.toLowerCase() === email.toLowerCase());
 
