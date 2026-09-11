@@ -4,7 +4,7 @@ try {
     require_once __DIR__ . '/painel/classe/conexao.php';
     $conexao = new Conexao();
     $ranchos = $conexao->consultaPreparada(
-        'SELECT titulo, descricao, valorDiaria, ativo
+        'SELECT ranCodigo, titulo, descricao, valorDiaria
          FROM rancho
          WHERE ativo = 1 AND dataExpiracao >= CURDATE()
          ORDER BY ranCodigo DESC'
@@ -75,13 +75,14 @@ try {
             <?php else: ?>
                 <?php foreach ($ranchos as $rancho): ?>
                     <div class="col-md-6">
-                        <div class="card h-100 shadow-sm">
+                        <a class="card h-100 shadow-sm text-decoration-none text-reset"
+                            href="rancho.php?codigo=<?php echo (int) $rancho['ranCodigo']; ?>">
                             <div class="card-body">
                                 <h4 class="card-title"><?php echo htmlspecialchars($rancho['titulo'], ENT_QUOTES, 'UTF-8'); ?></h4>
                                 <p class="card-text"><?php echo htmlspecialchars($rancho['descricao'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
                                 <p class="mb-1"><strong>Diária:</strong> R$ <?php echo htmlspecialchars($rancho['valorDiaria'], ENT_QUOTES, 'UTF-8'); ?></p>
-                                <p class="mb-0"><strong>Status:</strong> <?php echo (int) $rancho['ativo'] === 1 ? 'Anúncio ativo' : 'Anúncio inativo'; ?></p>
                             </div>
+                                </a>
                         </div>
                     </div>
                 <?php endforeach; ?>

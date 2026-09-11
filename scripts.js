@@ -56,6 +56,10 @@ const createListingCard = (item) => {
 
     const card = document.createElement('div');
     card.className = 'card h-100 shadow-sm';
+    card.addEventListener('click', () => {
+        window.location.href = `rancho.php?codigo=${encodeURIComponent(item.ranCodigo)}`;
+    });
+    card.style.cursor = 'pointer';
 
     const body = document.createElement('div');
     body.className = 'card-body';
@@ -165,7 +169,7 @@ const carregarDadosPublicos = async () => {
             valorDiaria: Number(rancho.valorDiaria),
             capacidadePessoas: Number(rancho.capacidadePessoas),
             ativo: Number(rancho.ativo) === 1,
-            dataExpiracao: new Date(`${rancho.dataExpiracao}T23:59:59`)
+            dataExpiracao: new Date(String(rancho.dataExpiracao).replace(' ', 'T'))
         })) : [];
         assinaturas = Array.isArray(dados.assinaturas) ? dados.assinaturas.map((plano) => ({
             ...plano,
@@ -176,6 +180,7 @@ const carregarDadosPublicos = async () => {
         renderPlanOptions();
         nextRanCodigo = ranchos.reduce((maior, rancho) => Math.max(maior, rancho.ranCodigo), 0) + 1;
         updateFilters();
+        if (activeOwner) renderPainel();
     } catch (erro) {
         console.error(erro);
         renderListings([{
@@ -249,6 +254,19 @@ const fazerLogout = () => {
                 bootstrap.Tab.getOrCreateInstance(document.getElementById('browse-tab')).show();
             }
         });
+};
+
+const restaurarSessao = async () => {
+    try {
+        const resposta = await fetch('api/proprietario.php?acao=sessao', {
+            headers: { Accept: 'application/json' }
+        });
+        if (!resposta.ok) return;
+        const dados = await resposta.json();
+        if (dados.proprietario) setActiveOwner(dados.proprietario);
+    } catch (erro) {
+        console.error('Não foi possível restaurar a sessão do proprietário.', erro);
+    }
 };
 
 loginForm.addEventListener('submit', async (event) => {
@@ -473,6 +491,7 @@ listingForm.addEventListener('submit', async (event) => {
 renderAuthArea();
 updateFilters();
 carregarDadosPublicos();
+restaurarSessao();
 
 const params = new URLSearchParams(window.location.search);
 if (params.get('login') === '1' && authModal) {
