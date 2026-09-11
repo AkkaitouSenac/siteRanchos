@@ -45,9 +45,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Conexao::validarCsrf($_POST['_csrf
                 ?>
                     <form action="administrador.php?item=remover" method="POST">
                         <input type="hidden" name="_csrf" value="<?php echo htmlspecialchars(Conexao::csrfToken(), ENT_QUOTES, 'UTF-8'); ?>">
-                        <!-- <i title="Remover <?php echo $titulo; ?>" class="bi bi-dash-square-fill" style="font-size: 30px; color: red;"></i> -->
-                        <button type="submit" class="btn btn-danger">-</button>
-                        <i onclick="location.href='<?php echo $arquivoAtual; ?>?item=adicionar'" title="Adicionar <?php echo $titulo; ?>" class="bi bi-plus-square-fill" style="font-size: 30px; color: green;"></i>
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <button type="submit" class="btn btn-danger">-</button>
+                            <a href="<?php echo htmlspecialchars($arquivoAtual, ENT_QUOTES, 'UTF-8'); ?>?item=adicionar"
+                                class="btn btn-success" title="Adicionar <?php echo $titulo; ?>">+</a>
+                        </div>
 
 
 
