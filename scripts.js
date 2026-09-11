@@ -54,10 +54,10 @@ if (window.bootstrap) {
 
 const createListingCard = (item) => {
     const col = document.createElement('div');
-    col.className = 'col-12';
+    col.className = 'col-md-6';
 
     const card = document.createElement('div');
-    card.className = 'card h-100 shadow-sm';
+    card.className = 'card public-listing-card h-100 shadow-sm';
     card.addEventListener('click', () => {
         window.location.href = `rancho.php?codigo=${encodeURIComponent(item.ranCodigo)}`;
     });
@@ -68,7 +68,7 @@ const createListingCard = (item) => {
 
     if (item.imagem) {
         const image = document.createElement('img');
-        image.className = 'card-img-top';
+        image.className = 'card-img-top public-listing-image';
         image.src = item.imagem;
         image.alt = `Imagem de ${item.titulo}`;
         card.appendChild(image);

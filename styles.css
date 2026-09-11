@@ -239,6 +239,35 @@ footer {
     color: var(--brand-dark);
 }
 
+.public-listing-card {
+    max-width: 34rem;
+    margin-inline: auto;
+    overflow: hidden;
+}
+
+.public-listing-image {
+    width: 100%;
+    height: 14rem;
+    object-fit: cover;
+}
+
+.public-listing-card .card-body {
+    padding: 1rem 1.25rem;
+}
+
+.public-listing-card .card-title {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.public-listing-card .card-text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+}
+
 .empty-state {
     border: 2px dashed rgba(200, 134, 13, 0.35);
     border-radius: 1rem;
