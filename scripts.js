@@ -181,6 +181,7 @@ const carregarDadosPublicos = async () => {
             valorDiaria: Number(rancho.valorDiaria),
             capacidadePessoas: Number(rancho.capacidadePessoas),
             ativo: Number(rancho.ativo) === 1,
+            dataCriacao: new Date(String(rancho.dataCriacao).replace(' ', 'T')),
             dataExpiracao: new Date(String(rancho.dataExpiracao).replace(' ', 'T'))
         })) : [];
         assinaturas = Array.isArray(dados.assinaturas) ? dados.assinaturas.map((plano) => ({
