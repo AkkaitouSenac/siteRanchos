@@ -95,9 +95,9 @@ const createListingCard = (item) => {
     body.append(
         title,
         description,
-        createDataLine('Localização:', item.cidade),
-        createDataLine('Preço por diária:', item.valorDiaria === '-' ? item.valorDiaria : `R$ ${item.valorDiaria}`),
-        createDataLine('Capacidade:', item.capacidadePessoas === '-' ? item.capacidadePessoas : `até ${item.capacidadePessoas} pessoas`),
+        createDataLine('LocalizaÃ§Ã£o:', item.cidade),
+        createDataLine('PreÃ§o por diÃ¡ria:', item.valorDiaria === '-' ? item.valorDiaria : `R$ ${item.valorDiaria}`),
+        createDataLine('Capacidade:', item.capacidadePessoas === '-' ? item.capacidadePessoas : `atÃ© ${item.capacidadePessoas} pessoas`),
         createDataLine('Contato:', item.contato || '-')
     );
 
@@ -140,8 +140,8 @@ const updateFilters = () => {
     });
 
     renderListings(filtered.length ? filtered : [{
-        titulo: 'Nenhum anúncio encontrado',
-        descricao: 'Ajuste os filtros para ver mais opções de ranchos disponíveis.',
+        titulo: 'Nenhum anÃºncio encontrado',
+        descricao: 'Ajuste os filtros para ver mais opÃ§Ãµes de ranchos disponÃ­veis.',
         cidade: '',
         valorDiaria: '-',
         capacidadePessoas: '-',
@@ -169,7 +169,7 @@ const carregarDadosPublicos = async () => {
             headers: { Accept: 'application/json' }
         });
         if (!resposta.ok) {
-            throw new Error('Falha ao carregar os anúncios.');
+            throw new Error('Falha ao carregar os anÃºncios.');
         }
 
         const dados = await resposta.json();
@@ -193,12 +193,13 @@ const carregarDadosPublicos = async () => {
         renderPlanOptions();
         nextRanCodigo = ranchos.reduce((maior, rancho) => Math.max(maior, rancho.ranCodigo), 0) + 1;
         updateFilters();
+        renderFeaturedListings();
         if (activeOwner) renderPainel();
     } catch (erro) {
         console.error(erro);
         renderListings([{
-            titulo: 'Não foi possível carregar os anúncios',
-            descricao: 'Verifique a conexão com o banco de dados e tente novamente.',
+            titulo: 'NÃ£o foi possÃ­vel carregar os anÃºncios',
+            descricao: 'Verifique a conexÃ£o com o banco de dados e tente novamente.',
             cidade: '',
             valorDiaria: '-',
             capacidadePessoas: '-',
@@ -230,7 +231,7 @@ const renderAuthArea = () => {
     const painelLink = document.createElement('button');
     painelLink.type = 'button';
     painelLink.className = 'btn-chip-link';
-    painelLink.textContent = 'Minha área';
+    painelLink.textContent = 'Minha Ã¡rea';
     painelLink.addEventListener('click', irParaPainel);
 
     const logoutLink = document.createElement('button');
@@ -285,7 +286,7 @@ const restaurarSessao = async () => {
         const params = new URLSearchParams(window.location.search);
         if (params.get('area') === '1' && activeOwner) irParaPainel();
     } catch (erro) {
-        console.error('Não foi possível restaurar a sessão do proprietário.', erro);
+        console.error('NÃ£o foi possÃ­vel restaurar a sessÃ£o do proprietÃ¡rio.', erro);
     }
 };
 
@@ -306,7 +307,7 @@ loginForm.addEventListener('submit', async (event) => {
         if (authModal) authModal.hide();
         setActiveOwner(dados.proprietario);
     } catch (erro) {
-        loginFeedback.textContent = erro.message || 'Não foi possível entrar.';
+        loginFeedback.textContent = erro.message || 'NÃ£o foi possÃ­vel entrar.';
     }
 });
 
@@ -319,7 +320,7 @@ registerForm.addEventListener('submit', async (event) => {
     const confirma = document.getElementById('regSenhaConfirma').value;
 
     if (senha !== confirma) {
-        registerFeedback.textContent = 'As senhas não coincidem.';
+        registerFeedback.textContent = 'As senhas nÃ£o coincidem.';
         return;
     }
     try {
@@ -335,7 +336,7 @@ registerForm.addEventListener('submit', async (event) => {
         if (authModal) authModal.hide();
         setActiveOwner(dados.proprietario);
     } catch (erro) {
-        registerFeedback.textContent = erro.message || 'Não foi possível criar a conta.';
+        registerFeedback.textContent = erro.message || 'NÃ£o foi possÃ­vel criar a conta.';
     }
 });
 
@@ -348,7 +349,7 @@ const tempoRestanteTexto = (dataExpiracao) => {
     if (dias > 1) return `${dias} dias restantes`;
     if (dias === 1) return '1 dia restante';
     if (dias === 0) return 'Expira hoje';
-    return `Expirado há ${Math.abs(dias)} dia(s)`;
+    return `Expirado hÃ¡ ${Math.abs(dias)} dia(s)`;
 };
 
 const createOwnerListingCard = (item) => {
@@ -372,7 +373,7 @@ const createOwnerListingCard = (item) => {
 
     const location = document.createElement('p');
     location.className = 'text-muted small mb-2';
-    location.textContent = `${item.cidade} · R$ ${item.valorDiaria}/diária · até ${item.capacidadePessoas} pessoas`;
+    location.textContent = `${item.cidade} Â· R$ ${item.valorDiaria}/diÃ¡ria Â· atÃ© ${item.capacidadePessoas} pessoas`;
 
     const badges = document.createElement('div');
     badges.className = 'd-flex flex-wrap gap-2 mb-3';
@@ -394,12 +395,12 @@ const createOwnerListingCard = (item) => {
 
     const criado = document.createElement('p');
     criado.className = 'small text-muted mb-0';
-    criado.textContent = `Criado em ${formatarData(item.dataCriacao)} · Expira em ${formatarData(item.dataExpiracao)}`;
+    criado.textContent = `Criado em ${formatarData(item.dataCriacao)} Â· Expira em ${formatarData(item.dataExpiracao)}`;
 
     const editar = document.createElement('button');
     editar.type = 'button';
     editar.className = 'btn btn-outline-primary btn-sm me-2';
-    editar.textContent = 'Editar anúncio';
+    editar.textContent = 'Editar anÃºncio';
     editar.addEventListener('click', () => abrirEdicao(item));
 
     const destaque = document.createElement('button');
@@ -407,7 +408,7 @@ const createOwnerListingCard = (item) => {
     destaque.className = 'btn btn-outline-warning btn-sm';
     destaque.textContent = 'Destacar por R$ 20,00 / 7 dias';
     destaque.addEventListener('click', () => {
-        window.alert('A taxa de destaque custa R$ 20,00 por 7 dias. O pagamento ainda não está integrado.');
+        window.alert('A taxa de destaque custa R$ 20,00 por 7 dias. O pagamento ainda nÃ£o estÃ¡ integrado.');
     });
 
     body.append(title, location, badges, criado, editar, destaque);
@@ -419,7 +420,7 @@ const createOwnerListingCard = (item) => {
 const abrirEdicao = (item) => {
     anuncioEmEdicao = item;
     listingForm.reset();
-    document.getElementById('listingModalLabel').textContent = 'Editar anúncio';
+    document.getElementById('listingModalLabel').textContent = 'Editar anÃºncio';
     listingName.value = item.titulo;
     listingDescription.value = item.descricao;
     listingLocation.value = item.cidade;
@@ -438,15 +439,15 @@ const renderPainel = () => {
     meusAnuncios.textContent = '';
     const meus = ranchos.filter(r => r.proCodigo === activeOwner.proCodigo);
 
-    painelSubtitle.textContent = `${activeOwner.nome} · ${meus.length} anúncio(s)`;
+    painelSubtitle.textContent = `${activeOwner.nome} Â· ${meus.length} anÃºncio(s)`;
 
     if (!meus.length) {
         const empty = document.createElement('div');
         empty.className = 'col-12';
         empty.innerHTML = `
             <div class="empty-state">
-                <p class="mb-2 fw-semibold">Você ainda não tem anúncios publicados.</p>
-                <p class="mb-0">Clique em "Publicar novo anúncio" para cadastrar seu primeiro rancho.</p>
+                <p class="mb-2 fw-semibold">VocÃª ainda nÃ£o tem anÃºncios publicados.</p>
+                <p class="mb-0">Clique em "Publicar novo anÃºncio" para cadastrar seu primeiro rancho.</p>
             </div>`;
         meusAnuncios.appendChild(empty);
         return;
@@ -475,7 +476,7 @@ const renderPlanOptions = () => {
         const label = document.createElement('label');
         label.className = 'form-check-label';
         label.setAttribute('for', `plan-${plano.assCodigo}`);
-        label.textContent = `${plano.nome} (${plano.dias} dias) — R$ ${plano.valor}`;
+        label.textContent = `${plano.nome} (${plano.dias} dias) â€” R$ ${plano.valor}`;
 
         wrapper.append(input, label);
         planOptions.appendChild(wrapper);
@@ -484,7 +485,7 @@ const renderPlanOptions = () => {
 
 btnNovoAnuncio.addEventListener('click', () => {
     anuncioEmEdicao = null;
-    document.getElementById('listingModalLabel').textContent = 'Publicar novo anúncio';
+    document.getElementById('listingModalLabel').textContent = 'Publicar novo anÃºncio';
     listingStatus.textContent = '';
     listingForm.reset();
     planOptions.closest('.col-12').classList.remove('d-none');
@@ -496,7 +497,7 @@ listingForm.addEventListener('submit', async (event) => {
     event.preventDefault();
 
     if (!activeOwner) {
-        listingStatus.textContent = 'Você precisa estar logado como proprietário para publicar um anúncio.';
+        listingStatus.textContent = 'VocÃª precisa estar logado como proprietÃ¡rio para publicar um anÃºncio.';
         listingStatus.className = 'mt-3 text-danger';
         return;
     }
@@ -515,12 +516,12 @@ listingForm.addEventListener('submit', async (event) => {
             const resposta = await fetch('api/editar-rancho.php', { method: 'POST', body: dados });
             const resultado = await resposta.json();
             if (!resposta.ok) throw new Error(resultado.erro);
-            listingStatus.textContent = 'Anúncio atualizado com sucesso.';
+            listingStatus.textContent = 'AnÃºncio atualizado com sucesso.';
             listingStatus.className = 'mt-3 text-success';
             listingModal.hide();
             await carregarDadosPublicos();
         } catch (erro) {
-            listingStatus.textContent = erro.message || 'Não foi possível editar o anúncio.';
+            listingStatus.textContent = erro.message || 'NÃ£o foi possÃ­vel editar o anÃºncio.';
             listingStatus.className = 'mt-3 text-danger';
         }
         return;
@@ -530,7 +531,7 @@ listingForm.addEventListener('submit', async (event) => {
     const plano = selected ? assinaturas.find(a => a.assCodigo === Number(selected.value)) : null;
 
     if (!plano) {
-        listingStatus.textContent = 'Escolha um plano de assinatura antes de publicar o anúncio.';
+        listingStatus.textContent = 'Escolha um plano de assinatura antes de publicar o anÃºncio.';
         listingStatus.className = 'mt-3 text-danger';
         return;
     }
@@ -555,14 +556,14 @@ listingForm.addEventListener('submit', async (event) => {
         const resultado = await resposta.json();
         if (!resposta.ok) throw new Error(resultado.erro);
 
-        listingStatus.textContent = 'Anúncio publicado com sucesso.';
+        listingStatus.textContent = 'AnÃºncio publicado com sucesso.';
         listingStatus.className = 'mt-3 text-success';
         listingForm.reset();
         if (listingModal) listingModal.hide();
         await carregarDadosPublicos();
         renderPainel();
     } catch (erro) {
-        listingStatus.textContent = erro.message || 'Não foi possível publicar o anúncio.';
+        listingStatus.textContent = erro.message || 'NÃ£o foi possÃ­vel publicar o anÃºncio.';
         listingStatus.className = 'mt-3 text-danger';
     }
 });
