@@ -65,8 +65,15 @@ try {
         $email = trim((string) ($_POST['email'] ?? ''));
         $telefone = trim((string) ($_POST['telefone'] ?? ''));
         $senha = (string) ($_POST['senha'] ?? '');
-        if ($nome === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || $telefone === '' || strlen($senha) < 4) {
+        if ($nome === '' || strlen($nome) > 45 || !filter_var($email, FILTER_VALIDATE_EMAIL)
+            || strlen($email) > 45 || $telefone === '' || strlen($telefone) > 20 || strlen($senha) < 4) {
             respostaJson(['erro' => 'Preencha os dados corretamente.'], 422);
+        }
+        if ($conexao->consultaPreparada(
+            'SELECT 1 FROM proprietario WHERE email = :email LIMIT 1',
+            ['email' => $email]
+        )->fetchColumn()) {
+            respostaJson(['erro' => 'Este e-mail já está cadastrado.'], 409);
         }
 
         $novoCodigo = (int) $conexao->consultaPreparada(
