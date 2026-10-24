@@ -135,6 +135,10 @@ class Conexao
         $this->validarTabela($tabela);
         $this->validarListaSql($colunas);
 
+        if ($condicao !== null && trim($condicao) !== '') {
+            $this->validarCondicaoSql($condicao);
+        }
+
         $sql = "SELECT {$colunas} FROM {$tabela}";
         if ($condicao !== null && trim($condicao) !== '') {
             $sql .= " WHERE {$condicao}";
@@ -158,7 +162,7 @@ class Conexao
     {
         $this->validarTabela($tabela);
         $this->validarListaSql($camposValores);
-        $this->validarListaSql($condicao);
+        $this->validarCondicaoSql($condicao);
 
         return $this->executarTransacao(
             "UPDATE {$tabela} SET {$camposValores} WHERE {$condicao}"
@@ -168,7 +172,7 @@ class Conexao
     public function remover(string $tabela, string $condicao): bool
     {
         $this->validarTabela($tabela);
-        $this->validarListaSql($condicao);
+        $this->validarCondicaoSql($condicao);
 
         return $this->executarTransacao(
             "DELETE FROM {$tabela} WHERE {$condicao}"
@@ -200,7 +204,44 @@ class Conexao
 
     private function validarListaSql(string $sql): void
     {
-        if (preg_match('/(;|--|\/\*|\*\/|#)/', $sql)) {
+        $sqlSemEspacos = trim($sql);
+        if ($sqlSemEspacos === '') {
+            throw new InvalidArgumentException('SQL inválido.');
+        }
+
+        if (preg_match('/(;|--|\/\*|\*\/|#|`|\\0)/', $sqlSemEspacos)) {
+            throw new InvalidArgumentException('SQL inválido.');
+        }
+
+        $tokensBloqueados = [
+            'SELECT', 'INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'CREATE',
+            'TRUNCATE', 'REPLACE', 'EXEC', 'CALL', 'UNION', 'JOIN', 'INTO',
+            'LOAD_FILE', 'OUTFILE', 'INFORMATION_SCHEMA', 'SCHEMA', 'TABLE',
+        ];
+        foreach ($tokensBloqueados as $token) {
+            if (preg_match('/\b' . preg_quote($token, '/') . '\b/i', $sqlSemEspacos)) {
+                throw new InvalidArgumentException('SQL inválido.');
+            }
+        }
+
+        if (!preg_match('/^[A-Za-z0-9_\s\.\,\(\)\*\'\"=<>!\+\-\/\%]+$/', $sqlSemEspacos)) {
+            throw new InvalidArgumentException('SQL inválido.');
+        }
+    }
+
+    private function validarCondicaoSql(string $condicao): void
+    {
+        $this->validarListaSql($condicao);
+
+        if (preg_match('/(^|\s)(?:OR|AND)\s*(?:1|true|false|null)\s*(?:=|<>|!=|IS)\s*(?:1|true|false|null)\s*$/i', trim($condicao))) {
+            throw new InvalidArgumentException('SQL inválido.');
+        }
+
+        if (preg_match('/^\s*(?:[0-9]+|true|false|null)\s*(?:=|<>|!=|IS)\s*(?:[0-9]+|true|false|null)\s*$/i', trim($condicao))) {
+            throw new InvalidArgumentException('SQL inválido.');
+        }
+
+        if (!preg_match('/[A-Za-z_][A-Za-z0-9_.]*/', $condicao)) {
             throw new InvalidArgumentException('SQL inválido.');
         }
     }
