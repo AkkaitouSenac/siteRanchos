@@ -231,18 +231,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Conexao::validarCsrf($_POST['_csrf
                     <button type="button" class="btn btn-danger" onclick="location.href='<?php echo $arquivoAtual; ?>?item=confirmarRemover'">Confirmar Remoção</button>
 <?php
                 } else if ($item == 'confirmarRemover' && !empty($_SESSION['CodigoParaRemover'])) {
-                    $resposta = $obj->remover($table, "$chavePrimaria IN ({$_SESSION['CodigoParaRemover']})");
+                    $codigosRemover = array_values(array_filter(
+                        array_map('intval', explode(',', (string) $_SESSION['CodigoParaRemover'])),
+                        static fn (int $id): bool => $id > 0
+                    ));
+                    $resposta = $codigosRemover
+                        ? $obj->remover($table, "$chavePrimaria IN (" . implode(',', $codigosRemover) . ")")
+                        : false;
                     unset($_SESSION['CodigoParaRemover']);
                     if ($resposta) {
-                        foreach (explode(',', $_SESSION['CodigoParaRemover']) as $id) {
-                            $obj->registrarLog((int) $_SESSION['admCodigo'], 'adm', 'DELETE', (int) $id);
+                        foreach ($codigosRemover as $id) {
+                            $obj->registrarLog((int) $_SESSION['admCodigo'], 'adm', 'DELETE', $id);
                         }
                         header("Location: $arquivoAtual?item=listar&sucesso=3");
                         exit();
                     } else {
                         echo "Erro ao remover o administrador. Por favor, tente novamente.";
                     }
-                } 
+                }
                 
                 ?>
             </div>
